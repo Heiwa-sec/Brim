@@ -30,6 +30,16 @@ the maintainer live-tests phase (c), then start phase (d), the file tray. Live t
 
 Phase (c) as built: `Brim/Modules/Lyrics/` holds `LRC` (parser, tested), `LRCLibClient` (title and artist only; caches hits and 404s on disk; 404s never expire, so delete the cache folder to retry), `ArtworkPalette` (8x8 downsample, tested), `LyricsModule` (own module id `lyrics`, refetches when title or artist changes) and `LyricsView`. Timing has no timer: the view's `TimelineView` has one scheduled date per upcoming line, only while the island is expanded and playing. Not done on purpose: unsynced lyrics fallback, title cleaning ("Remastered"), no retry after a network failure until the track changes, settings UI (phase f).
 
+### Decisions and gotchas worth knowing (so a new session need not rediscover them)
+- **Plans:** the overall plan is the phase plan (kept outside the repo); the phase (c) plan is the phase plan (kept outside the repo). Each new phase gets its own short plan, approved before coding.
+- **Lyrics layout (the maintainer chose):** the island widens with a lyrics column on the right (not a taller strip), and the artwork colour gradient fills only the current line's text; the island itself stays black.
+- **LRCLIB** was probed live: `GET /api/get?track_name=&artist_name=` returns 200 with `syncedLyrics`, or 404 when there is no match. Duration and album are not sent.
+- **Adding a source file:** run `xcodegen generate` first. Pure files that tests need must also be listed under `BrimTests` sources in `project.yml`. `Brim.xcodeproj` is generated and not committed.
+- **SourceKit** in the editor reports "Cannot find type ..." across files until the project is regenerated. Trust `xcodebuild`, not those diagnostics.
+- **CPU measurements are noisy** on this machine. To judge a regression, build the previous commit in a scratch `git worktree` and measure it back to back; do not compare against old numbers. A `sample <pid> 3` showing the main thread blocked in `mach_msg` means nothing is polling.
+- **Pointer-driven wakeups:** the global mouse monitor wakes the app when the pointer moves anywhere, which is expected and not a leak.
+- **Not tested without music:** anything depending on real playback (lyrics, scrubber, buttons). Build the feature, then hand the maintainer an exact checklist.
+
 ### Open questions for the maintainer
 - **Lock test was too short.** The spike log showed LOCKED then UNLOCKED two seconds apart. Re-test with a longer lock (see below) before phase (h). Not blocking phases (c) to (g).
 
