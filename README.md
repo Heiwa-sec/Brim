@@ -17,7 +17,7 @@ Target: macOS 26+, Apple Silicon, Swift 6, SwiftUI plus AppKit, agent app (`LSUI
 |---|---|---|
 | 0 Lock-screen spike | Done, committed | See "Lock-screen findings" |
 | a Panel, geometry, states | Done, committed | Expands from the notch (fixed: window pre-grows before the spring starts) |
-| b Now Playing | Done, committed | Verified with fake data only; needs a real-music test (see Open questions) |
+| b Now Playing | Done, committed, **verified live by the maintainer (2026-11-04)** | Real playback works; buttons respond on the first click |
 | c Lyrics | **Next** | |
 | d File tray | | |
 | e Charging, Bluetooth/AirPods, weather, HUD | | |
@@ -29,9 +29,10 @@ Target: macOS 26+, Apple Silicon, Swift 6, SwiftUI plus AppKit, agent app (`LSUI
 Phase (c): Lyrics. LRCLIB client (`GET /api/get?track_name=&artist_name=`, User-Agent `Brim/<version> (personal)`, no duration or album sent unless the maintainer opts in), LRC parser (unit-tested), on-disk cache in `~/Library/Caches/Brim/lyrics/`, colour gradient sampled from the artwork, tap a line to seek (`NowPlayingModule.seek(to:)` already exists), one-shot timer to the next line (no polling), and the notch-lyrics toggle (`module.lyrics.enabled`). Lyrics view goes in the expanded island next to the artwork; fetched at runtime for display only, never bundled.
 
 ### Open questions for the maintainer
-- **Now Playing is untested with real playback.** The adapter loads under Perl on macOS 27.0.1 with our signature and returns `null` when idle, but I could not get any test player (QuickTime, upstream test client, Music's single track) to register as Now Playing, so a live track has never flowed through it. Play something in Music, Spotify or a Safari video, then watch the island. If nothing appears, run this while it plays and send me the output:
-  `A=~/Developer/Brim/build/Build/Products/Debug/Brim.app/Contents; /usr/bin/perl $A/Resources/mediaremote-adapter.pl $A/Frameworks/MediaRemoteAdapter.framework get --micros --no-artwork`
-- **Lock test was too short.** The spike log showed LOCKED then UNLOCKED two seconds apart. Re-test with a longer lock (see below) before phase (h).
+- **Lock test was too short.** The spike log showed LOCKED then UNLOCKED two seconds apart. Re-test with a longer lock (see below) before phase (h). Not blocking phases (c) to (g).
+
+### Session log
+- **2026-11-04 (evening):** phases 0, (a) and (b) done and committed. Expand-from-notch fix done. the maintainer confirmed Now Playing works with real music and buttons need one click. Phase (c), Lyrics, is next and has not been started.
 
 ---
 
