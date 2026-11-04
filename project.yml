@@ -1,0 +1,26 @@
+name: Brim
+options:
+  bundleIdPrefix: dev.brim
+  deploymentTarget:
+    macOS: "26.0"
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    DEVELOPMENT_TEAM: CTGDR36LFJ
+    CODE_SIGN_STYLE: Automatic
+    ENABLE_HARDENED_RUNTIME: NO
+targets:
+  # Throwaway: answers "can a window render over the lock screen on this macOS?" Deleted after integration.
+  LockSpike:
+    type: application
+    platform: macOS
+    sources: [LockSpike]
+    info:
+      path: LockSpike/Info.plist
+      properties:
+        LSUIElement: true
+        CFBundleName: LockSpike
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.brim.LockSpike
+        GENERATE_INFOPLIST_FILE: NO
