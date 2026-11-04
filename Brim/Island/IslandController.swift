@@ -55,6 +55,16 @@ final class IslandController {
         return NSRect(x: g.centerX - size.width / 2, y: screen.frame.maxY - height, width: size.width, height: height)
     }
 
+    /// Grows and renders the panel at full size first, then runs `change` on the next turn. Flipping the state in the
+    /// same pass shows the old, small image centred in the bigger window for a frame, so the island seems to form mid-panel.
+    private func grow(then change: @escaping @MainActor () -> Void) {
+        shrinkWork?.cancel()
+        panel.setFrame(frame(for: .expanded), display: true)
+        panel.contentView?.layoutSubtreeIfNeeded()
+        panel.displayIfNeeded()
+        Task { @MainActor in change() }
+    }
+
     /// Grow the panel at once so the spring has room; shrink only after it settles, so a collapsed panel never covers menu-bar items.
     private func resizePanel() {
         let target = frame(for: model.state)
@@ -74,7 +84,8 @@ final class IslandController {
     private func handle(isClick: Bool) {
         let inside = frame(for: model.state).insetBy(dx: -1, dy: -1).contains(NSEvent.mouseLocation)
         if isClick {
-            model.pinned = inside // a click on the island keeps it open; a click elsewhere releases it
+            // a click on the island keeps it open; a click elsewhere releases it
+            if inside { grow { [model] in model.pinned = true } } else { model.pinned = false }
             return
         }
         if !inside {
@@ -82,8 +93,9 @@ final class IslandController {
             model.hovering = false
         } else if !model.hovering && hoverWork == nil {
             let work = DispatchWorkItem { [weak self] in
-                self?.hoverWork = nil
-                self?.model.hovering = true
+                guard let self else { return }
+                self.hoverWork = nil
+                self.grow { [model = self.model] in model.hovering = true }
             }
             hoverWork = work
             DispatchQueue.main.asyncAfter(deadline: .now() + DisplaySettings.hoverDelay, execute: work)
