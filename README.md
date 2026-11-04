@@ -18,7 +18,7 @@ Target: macOS 26+, Apple Silicon, Swift 6, SwiftUI plus AppKit, agent app (`LSUI
 | 0 Lock-screen spike | Done, committed | See "Lock-screen findings" |
 | a Panel, geometry, states | Done, committed | Expands from the notch (fixed: window pre-grows before the spring starts) |
 | b Now Playing | Done, committed, **verified live by the maintainer (2026-11-04)** | Real playback works; buttons respond on the first click |
-| c Lyrics | **Next** | |
+| c Lyrics | Built, 20 unit tests pass, committed. **Not yet verified live by the maintainer** (needs real music) | See "Next step" |
 | d File tray | | |
 | e Charging, Bluetooth/AirPods, weather, HUD | | |
 | f Settings and polish | | |
@@ -26,12 +26,15 @@ Target: macOS 26+, Apple Silicon, Swift 6, SwiftUI plus AppKit, agent app (`LSUI
 | h Lock-screen integration | | |
 
 ### Next step
-Phase (c): Lyrics. LRCLIB client (`GET /api/get?track_name=&artist_name=`, User-Agent `Brim/<version> (personal)`, no duration or album sent unless the maintainer opts in), LRC parser (unit-tested), on-disk cache in `~/Library/Caches/Brim/lyrics/`, colour gradient sampled from the artwork, tap a line to seek (`NowPlayingModule.seek(to:)` already exists), one-shot timer to the next line (no polling), and the notch-lyrics toggle (`module.lyrics.enabled`). Lyrics view goes in the expanded island next to the artwork; fetched at runtime for display only, never bundled.
+the maintainer live-tests phase (c), then start phase (d), the file tray. Live test: play a well-known song in Music or Spotify, hover the notch. The island should widen and a lyrics column should appear on the right, following the song, with the current line in the artwork's colours. Also check: tap a line to seek; pause freezes the highlight; skipping a track refetches; an unknown track leaves the island narrow; replaying a song makes no network request (a file appears in `~/Library/Caches/Brim/lyrics/`); `defaults write dev.brim.Brim module.lyrics.enabled -bool false` removes the column.
+
+Phase (c) as built: `Brim/Modules/Lyrics/` holds `LRC` (parser, tested), `LRCLibClient` (title and artist only; caches hits and 404s on disk; 404s never expire, so delete the cache folder to retry), `ArtworkPalette` (8x8 downsample, tested), `LyricsModule` (own module id `lyrics`, refetches when title or artist changes) and `LyricsView`. Timing has no timer: the view's `TimelineView` has one scheduled date per upcoming line, only while the island is expanded and playing. Not done on purpose: unsynced lyrics fallback, title cleaning ("Remastered"), no retry after a network failure until the track changes, settings UI (phase f).
 
 ### Open questions for the maintainer
 - **Lock test was too short.** The spike log showed LOCKED then UNLOCKED two seconds apart. Re-test with a longer lock (see below) before phase (h). Not blocking phases (c) to (g).
 
 ### Session log
+- **2026-11-05:** phase (c) Lyrics built and committed; build and 20 tests pass; app idle: 0 leaks, 12 MB, nothing running in a 3 s stack sample (CPU readings were noisy on this machine: 0.5 to 0.6% for this build against 2.0% for the previous commit measured minutes later, so no regression). Live test with real music is still owed.
 - **2026-11-04 (evening):** phases 0, (a) and (b) done and committed. Expand-from-notch fix done. the maintainer confirmed Now Playing works with real music and buttons need one click. Phase (c), Lyrics, is next and has not been started.
 
 ---
@@ -72,7 +75,7 @@ Do not run `leaks` while hover-testing: it suspends the process.
 ## Layout
 
 - `Brim/Island/`: `NotchGeometry` (pure, tested), `IslandShape`, `IslandModel`, `IslandView`, `IslandPanel`, `IslandController` (one per display), `DisplayManager`, `DisplaySettings`.
-- `Brim/Modules/`: `IslandModule` protocol and `ModuleHost` (starts/stops modules from `module.<id>.enabled`, default on); `NowPlaying/` holds the module, views, `MediaAdapter` (Perl child process) and `NowPlayingInfo` (pure, tested).
+- `Brim/Modules/`: `IslandModule` protocol and `ModuleHost` (starts/stops modules from `module.<id>.enabled`, default on); `NowPlaying/` holds the module, views, `MediaAdapter` (Perl child process) and `NowPlayingInfo` (pure, tested); `Lyrics/` is described under "Next step". Every module with expanded content becomes a column; `IslandModel.expandedColumns` widens the island.
 - `Vendor/mediaremote-adapter/`: BSD-3, unmodified; built as the embedded `MediaRemoteAdapter.framework` (bundled, not linked). `test.m` is excluded from the build.
 - `Brim/App/`: `main.swift` (explicit entry point; `@main` on a delegate would never create it without a nib), `AppDelegate`.
 - `LockSpike/`: throwaway lock-screen prototype, deleted after phase (h).

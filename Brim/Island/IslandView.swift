@@ -14,7 +14,7 @@ struct IslandView: View {
             .frame(width: model.size.width, height: model.size.height)
             // The spring stops here: the panel itself resizes instantly, and animating the alignment frame
             // below would make the shape drift in from the middle of the panel instead of the notch.
-            .animation(morph, value: model.state)
+            .animation(morph, value: model.size) // size, not state, so adding the lyrics column springs too
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             .ignoresSafeArea() // a window over the notch gets a top safe-area inset that would push the shape down
             .padding(.top, model.geometry.topInset)
@@ -44,8 +44,9 @@ struct IslandView: View {
 
     private var expandedBody: some View {
         Group {
-            if let view = host.expandedViews.first {
-                view
+            let views = host.expandedViews
+            if !views.isEmpty {
+                HStack(spacing: IslandModel.columnGap) { ForEach(views.indices, id: \.self) { views[$0] } }
             } else {
                 Text(host.emptyMessage)
                     .font(.callout)

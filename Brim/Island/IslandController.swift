@@ -40,6 +40,7 @@ final class IslandController {
     private func trackActivity() {
         withObservationTracking {
             model.activityCount = host.activityCount
+            model.expandedColumns = max(1, host.expandedViews.count)
         } onChange: { [weak self] in
             Task { @MainActor in self?.trackActivity() }
         }
@@ -63,7 +64,7 @@ final class IslandController {
     /// Screen-space frame of the island (including the top gap) in `state`.
     private func frame(for state: IslandState) -> NSRect {
         let g = model.geometry
-        let size = IslandModel.size(for: state, geometry: g)
+        let size = IslandModel.size(for: state, geometry: g, columns: model.expandedColumns)
         let height = size.height + g.topInset
         return NSRect(x: g.centerX - size.width / 2, y: screen.frame.maxY - height, width: size.width, height: height)
     }
