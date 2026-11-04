@@ -16,9 +16,9 @@ Target: macOS 26+, Apple Silicon, Swift 6, SwiftUI plus AppKit, agent app (`LSUI
 | Phase | State | Notes |
 |---|---|---|
 | 0 Lock-screen spike | Done, committed | See "Lock-screen findings" |
-| a Panel, geometry, states | Done, committed | Hover verified by script; needs your hands-on test |
-| b Now Playing | **Next** | |
-| c Lyrics | | |
+| a Panel, geometry, states | Done, committed | Expands from the notch (fixed: window pre-grows before the spring starts) |
+| b Now Playing | Done, committed | Verified with fake data only; needs a real-music test (see Open questions) |
+| c Lyrics | **Next** | |
 | d File tray | | |
 | e Charging, Bluetooth/AirPods, weather, HUD | | |
 | f Settings and polish | | |
@@ -26,10 +26,12 @@ Target: macOS 26+, Apple Silicon, Swift 6, SwiftUI plus AppKit, agent app (`LSUI
 | h Lock-screen integration | | |
 
 ### Next step
-Phase (b): Now Playing. Vendor `ungive/mediaremote-adapter` (BSD-3, keep its licence in `THIRD_PARTY_LICENSES.md`), run `perl … stream` as a child process, merge the JSON diffs, and show title/artist/artwork/scrubber/transport plus a compact live activity. Introduce the `IslandModule` protocol and `ModuleHost` here (not before; phase (a) had no modules).
+Phase (c): Lyrics. LRCLIB client (`GET /api/get?track_name=&artist_name=`, User-Agent `Brim/<version> (personal)`, no duration or album sent unless the maintainer opts in), LRC parser (unit-tested), on-disk cache in `~/Library/Caches/Brim/lyrics/`, colour gradient sampled from the artwork, tap a line to seek (`NowPlayingModule.seek(to:)` already exists), one-shot timer to the next line (no polling), and the notch-lyrics toggle (`module.lyrics.enabled`). Lyrics view goes in the expanded island next to the artwork; fetched at runtime for display only, never bundled.
 
 ### Open questions for the maintainer
-- **Lock test was too short.** The spike log showed LOCKED then UNLOCKED two seconds apart. You saw the card, but we are not sure it showed *over the lock UI* rather than just before or after. Re-test with a longer lock (see below) before phase (h).
+- **Now Playing is untested with real playback.** The adapter loads under Perl on macOS 27.0.1 with our signature and returns `null` when idle, but I could not get any test player (QuickTime, upstream test client, Music's single track) to register as Now Playing, so a live track has never flowed through it. Play something in Music, Spotify or a Safari video, then watch the island. If nothing appears, run this while it plays and send me the output:
+  `A=~/Developer/Brim/build/Build/Products/Debug/Brim.app/Contents; /usr/bin/perl $A/Resources/mediaremote-adapter.pl $A/Frameworks/MediaRemoteAdapter.framework get --micros --no-artwork`
+- **Lock test was too short.** The spike log showed LOCKED then UNLOCKED two seconds apart. Re-test with a longer lock (see below) before phase (h).
 
 ---
 
@@ -63,12 +65,14 @@ xcodebuild -project Brim.xcodeproj -scheme BrimTests -derivedDataPath build test
 build/Build/Products/Debug/Brim.app/Contents/MacOS/Brim &
 scripts/measure.sh 60                # average idle CPU, memory footprint, leaks
 ```
-Measured after phase (a): 0.0% idle CPU, about 33 MB resident collapsed (about 50 MB after the first expand), 0 leaks.
+Measured after phase (b), idle: 0.01% CPU, 13 MB footprint, 0 leaks. With a (fake) track: compact 0.01%, expanded 0.4% (scrubber timeline, only while expanded). An animated SF Symbol in the compact pill cost 8% CPU, so it is static.
 Do not run `leaks` while hover-testing: it suspends the process.
 
 ## Layout
 
 - `Brim/Island/`: `NotchGeometry` (pure, tested), `IslandShape`, `IslandModel`, `IslandView`, `IslandPanel`, `IslandController` (one per display), `DisplayManager`, `DisplaySettings`.
+- `Brim/Modules/`: `IslandModule` protocol and `ModuleHost` (starts/stops modules from `module.<id>.enabled`, default on); `NowPlaying/` holds the module, views, `MediaAdapter` (Perl child process) and `NowPlayingInfo` (pure, tested).
+- `Vendor/mediaremote-adapter/`: BSD-3, unmodified; built as the embedded `MediaRemoteAdapter.framework` (bundled, not linked). `test.m` is excluded from the build.
 - `Brim/App/`: `main.swift` (explicit entry point; `@main` on a delegate would never create it without a nib), `AppDelegate`.
 - `LockSpike/`: throwaway lock-screen prototype, deleted after phase (h).
 - `BrimTests/`: unit tests. Pure files are compiled straight into the test bundle, so tests never launch the app.
@@ -94,4 +98,4 @@ No Automation, Screen Recording or Input Monitoring. Phase (a) requests none.
 
 ## Third-party
 
-`ungive/mediaremote-adapter` (BSD-3-Clause) is vendored from phase (b). See `THIRD_PARTY_LICENSES.md` once added.
+`ungive/mediaremote-adapter` (BSD-3-Clause) is vendored; see `THIRD_PARTY_LICENSES.md`.

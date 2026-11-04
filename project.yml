@@ -13,7 +13,15 @@ targets:
   Brim:
     type: application
     platform: macOS
-    sources: [Brim]
+    sources:
+      - Brim
+      - path: Vendor/mediaremote-adapter/bin/mediaremote-adapter.pl
+        buildPhase: resources
+    dependencies:
+      # Bundled for the Perl script to dlopen; deliberately not linked.
+      - target: MediaRemoteAdapter
+        link: false
+        embed: true
     info:
       path: Brim/App/Info.plist
       properties:
@@ -24,11 +32,29 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: dev.brim.Brim
         GENERATE_INFOPLIST_FILE: NO
+  # Vendored BSD-3 framework (ungive/mediaremote-adapter), unmodified. Symbols must stay visible: Perl calls into it.
+  MediaRemoteAdapter:
+    type: framework
+    platform: macOS
+    sources:
+      - path: Vendor/mediaremote-adapter/src
+        excludes: ["test/**", "adapter/test.m"] # the `test` command is unused: it spawns a fake player
+      - path: Vendor/mediaremote-adapter/include
+        headers: [{path: MediaRemoteAdapter.h, visibility: public}]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.brim.MediaRemoteAdapter
+        GENERATE_INFOPLIST_FILE: YES
+        CLANG_ENABLE_OBJC_ARC: YES
+        GCC_SYMBOLS_PRIVATE_EXTERN: NO
+        OTHER_CFLAGS: -fvisibility=default
+        HEADER_SEARCH_PATHS: ["$(SRCROOT)/Vendor/mediaremote-adapter/src", "$(SRCROOT)/Vendor/mediaremote-adapter/include"]
+        OTHER_LDFLAGS: ["-framework", "Foundation", "-framework", "AppKit", "-framework", "UniformTypeIdentifiers"]
   # Compiles pure-logic files directly, so tests never launch the app.
   BrimTests:
     type: bundle.unit-test
     platform: macOS
-    sources: [BrimTests, Brim/Island/NotchGeometry.swift]
+    sources: [BrimTests, Brim/Island/NotchGeometry.swift, Brim/Modules/NowPlaying/NowPlayingInfo.swift]
     settings:
       base:
         GENERATE_INFOPLIST_FILE: YES

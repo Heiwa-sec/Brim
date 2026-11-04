@@ -5,8 +5,10 @@ import AppKit
 final class DisplayManager {
     private var controllers: [String: IslandController] = [:]
     private var observers: [NSObjectProtocol] = []
+    private let host: ModuleHost
 
-    init() {
+    init(host: ModuleHost) {
+        self.host = host
         let center = NotificationCenter.default
         for name in [NSApplication.didChangeScreenParametersNotification, UserDefaults.didChangeNotification] {
             observers.append(center.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
@@ -26,7 +28,7 @@ final class DisplayManager {
             if let controller = controllers[id] {
                 controller.update(screen: screen, settings: settings)
             } else {
-                controllers[id] = IslandController(screen: screen, settings: settings)
+                controllers[id] = IslandController(screen: screen, settings: settings, host: host)
             }
         }
         for id in controllers.keys where !live.contains(id) {

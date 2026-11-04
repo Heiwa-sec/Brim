@@ -6,22 +6,26 @@ import SwiftUI
 final class IslandController {
     private var screen: NSScreen
     private let model: IslandModel
+    private let host: ModuleHost
     private let panel = IslandPanel()
     private var monitors: [Any] = []
     private var hoverWork: DispatchWorkItem?
     private var shrinkWork: DispatchWorkItem?
 
-    init(screen: NSScreen, settings: DisplaySettings) {
+    init(screen: NSScreen, settings: DisplaySettings, host: ModuleHost) {
         self.screen = screen
+        self.host = host
         model = IslandModel(geometry: screen.notchGeometry)
         model.hideUntilTop = settings.hideUntilTop
         model.onStateChange = { [weak self] in self?.resizePanel() }
 
-        let host = NSHostingView(rootView: IslandView(model: model))
+        let host = NSHostingView(rootView: IslandView(model: model, host: host))
         host.sizingOptions = [] // the panel frame is ours; SwiftUI must not resize the window
         panel.contentView = host
         panel.setFrame(frame(for: model.state), display: false)
         panel.orderFrontRegardless()
+
+        trackActivity()
 
         // Global monitors see pointer events over other apps, local ones over our own panel. Neither needs a permission for mouse events.
         let mask: NSEvent.EventTypeMask = [.mouseMoved, .leftMouseDown]
@@ -30,6 +34,15 @@ final class IslandController {
         }
         monitors.append(NSEvent.addGlobalMonitorForEvents(matching: mask) { handler($0.type == .leftMouseDown) } as Any)
         monitors.append(NSEvent.addLocalMonitorForEvents(matching: mask) { handler($0.type == .leftMouseDown); return $0 } as Any)
+    }
+
+    /// Mirrors the host's live-activity count into the model; re-arms itself because observation fires once per change.
+    private func trackActivity() {
+        withObservationTracking {
+            model.activityCount = host.activityCount
+        } onChange: { [weak self] in
+            Task { @MainActor in self?.trackActivity() }
+        }
     }
 
     func update(screen: NSScreen, settings: DisplaySettings) {
