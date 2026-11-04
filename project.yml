@@ -10,6 +10,29 @@ settings:
     CODE_SIGN_STYLE: Automatic
     ENABLE_HARDENED_RUNTIME: NO
 targets:
+  Brim:
+    type: application
+    platform: macOS
+    sources: [Brim]
+    info:
+      path: Brim/App/Info.plist
+      properties:
+        LSUIElement: true
+        CFBundleName: Brim
+        NSPrincipalClass: NSApplication
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.brim.Brim
+        GENERATE_INFOPLIST_FILE: NO
+  # Compiles pure-logic files directly, so tests never launch the app.
+  BrimTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources: [BrimTests, Brim/Island/NotchGeometry.swift]
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: dev.brim.BrimTests
   # Throwaway: answers "can a window render over the lock screen on this macOS?" Deleted after integration.
   LockSpike:
     type: application
