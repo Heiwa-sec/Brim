@@ -2,3 +2,9 @@
 build/
 DerivedData/
 .DS_Store
+*.log
+*.p12
+*.mobileprovision
+*.cer
+.env*
+xcuserdata/

@@ -56,8 +56,9 @@ final class WeatherModule: NSObject, IslandModule, CLLocationManagerDelegate {
         fetch?.cancel()
         fetch = Task {
             do {
-                let (data, _) = try await URLSession.shared.data(from: WeatherInfo.url(latitude: latitude, longitude: longitude))
+                let (data, response) = try await URLSession.shared.data(from: WeatherInfo.url(latitude: latitude, longitude: longitude))
                 guard !Task.isCancelled else { return }
+                guard (response as? HTTPURLResponse)?.statusCode == 200, data.count <= 64_000 else { throw URLError(.badServerResponse) }
                 guard let parsed = WeatherInfo(json: data) else { throw URLError(.cannotParseResponse) }
                 info = parsed
                 fetched = .now

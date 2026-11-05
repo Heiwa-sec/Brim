@@ -1,8 +1,0 @@
-2026-11-04T11:09:50Z start macOS Version 27.0.1 (Build 26A434) seconds=6 level=400
-2026-11-04T11:09:50Z space=45 statuses=["show": -1342177280, "setLevel": 0, "addWindows": -1342177280, "addToSpaces": -1342177280, "moveToManaged": -1342177280]
-2026-11-04T11:09:57Z exit: deadline reached
-2026-11-04T11:11:25Z start macOS Version 27.0.1 (Build 26A434) seconds=25 level=300
-2026-11-04T11:11:25Z space=46 statuses=["addToSpaces": -1342177280, "moveToManaged": -1342177280, "addWindows": -1342177280, "setLevel": 0, "show": -1342177280]
-2026-11-04T11:11:26Z LOCKED windowOnscreen=1
-2026-11-04T11:11:28Z UNLOCKED windowOnscreen=1
-2026-11-04T11:11:51Z exit: deadline reached

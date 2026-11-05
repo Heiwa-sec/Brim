@@ -3,6 +3,8 @@ import Foundation
 
 /// Fetches synced lyrics from lrclib.net. Sends only title and artist. Results, including "not found", are cached on disk.
 enum LRCLibClient {
+    private static let maxBytes = 512_000
+
     /// Returns the LRC text, or nil when LRCLIB has no synced lyrics for this track. Throws on network or server errors, which are not cached.
     static func syncedLyrics(title: String, artist: String) async throws -> String? {
         let file = cacheFile(title: title, artist: artist)
@@ -13,7 +15,7 @@ enum LRCLibClient {
         var request = URLRequest(url: components.url!, timeoutInterval: 10)
         request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
         let (data, response) = try await URLSession.shared.data(for: request)
-
+        guard data.count <= maxBytes else { throw URLError(.dataLengthExceedsMaximum) } // a real answer is a few KB; never cache a huge one
         let status = (response as? HTTPURLResponse)?.statusCode
         let body: Data
         switch status {

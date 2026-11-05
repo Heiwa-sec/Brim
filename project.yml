@@ -8,7 +8,7 @@ settings:
     SWIFT_VERSION: "6.0"
     DEVELOPMENT_TEAM: CTGDR36LFJ
     CODE_SIGN_STYLE: Automatic
-    ENABLE_HARDENED_RUNTIME: NO
+    ENABLE_HARDENED_RUNTIME: YES
 targets:
   Brim:
     type: application
