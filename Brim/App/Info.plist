@@ -20,6 +20,10 @@
 	<string>1</string>
 	<key>LSUIElement</key>
 	<true/>
+	<key>NSLocationUsageDescription</key>
+	<string>Brim uses your approximate location (about 10 km) to show the local weather.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Brim uses your approximate location (about 10 km) to show the local weather.</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 </dict>
