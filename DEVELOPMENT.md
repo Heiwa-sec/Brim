@@ -22,6 +22,12 @@ Target: macOS 26+, Apple Silicon, Swift 6, SwiftUI plus AppKit, agent app (`LSUI
 | g Notification mirroring | Built, committed and **checked here** (real notifications mirrored with Full Disk Access); off by default; awaiting the maintainer's test | Plan: the phase plan (kept outside the repo) |
 | h Lock-screen integration | **Dropped** (2026-11-05). Nothing from a normal app can show on the macOS 27 lock screen; the wallpaper trick was judged too risky for the Aerial wallpaper. Replaced by an opt-in full-screen Now Playing view on ⌥⌘L | Built, committed, checked here |
 
+### Published
+
+To ship a new version: bump `CFBundleShortVersionString` in `project.yml`, run `./scripts/release.sh`, then `gh release create vX.Y build/release/Brim.zip build/release/Brim.zip.sha256 --repo Heiwa-sec/Brim`. `gh` is installed with Homebrew and signed in as Heiwa-sec.
+
+Security audit done 2026-11-05: no secrets in code or history, only two HTTPS calls, reply-size caps added, hardened runtime on, no dead code. Open limits: not sandboxed, one private macOS function (brightness), media helper runs through `/usr/bin/perl`, vendored mediaremote-adapter not read beyond its license.
+
 ### Next step
 the maintainer: (1) play music, then press ⌥⌘L or click the cover in the open island: full-screen view with drifting blurred cover, big cover, synced lyrics; Esc, or a click on the empty background, closes it (other keys only wake the controls); the bar under the title shows position and length and a click or drag on it seeks. Note what to change. (2) Test charging and notifications at home. Ideas not built: transport buttons on the full-screen view, a Settings toggle or other hot key for it.
 
@@ -58,6 +64,7 @@ Phase (d) as built: `Brim/Modules/FileTray/` holds `FileTrayModule` (file URLs i
 None open except the ⌥⌘L lock test in "Next step".
 
 ### Session log
+- **2026-11-05 (published):** audit fixes, MIT license, public README (this file holds the old one), release script, history rewritten to the noreply address, repo created, code pushed and v1.0 released through `gh`. Next: the maintainer's live tests (see Next step), then feedback from real users.
 - **2026-11-05 (Bluetooth removed):** the maintainer asked to get rid of the Bluetooth tab in the notch. The whole module, its tests, the permission row and the Info.plist usage string are deleted (git history has them); 33 tests pass.
 - **2026-11-05 (lock dropped):** the ⌥⌘L show-then-lock panel vanished at lock, so lock-screen work was dropped. ⌥⌘L is now a full-screen Now Playing view with animated artwork background, cover and big lyrics. `Brim/LockScreen/` became `Brim/FullScreen/`; no private API remains. 37 tests pass.
 - **2026-11-05 (lock fallback):** the maintainer reported the lock-screen card did not appear. Replaced the overlay with the ⌥⌘L pre-lock panel; deleted `LockSpike/`, `KillSwitch` (and its tests) and the Settings toggle; 37 tests pass. Panel and cancel verified by synthesizing the hot key; the real lock is owed by the maintainer.
