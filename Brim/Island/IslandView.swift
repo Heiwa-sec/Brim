@@ -63,15 +63,15 @@ struct IslandView: View {
                     .glassEffect(in: .capsule)
             }
         }
+        .padding(.top, model.geometry.size.height + 4) // stay clear of the notch
+        .padding(.horizontal, 28).padding(.bottom, 16)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .overlay(alignment: .topTrailing) {
             Button { SettingsWindow.shared.show() } label: { Image(systemName: "gearshape.fill").font(.system(size: 12)) }
                 .buttonStyle(.plain)
                 .foregroundStyle(.white.opacity(0.5))
-                .padding(.top, model.geometry.size.height + 4).padding(.trailing, 4)
+                .padding(.top, 8).padding(.trailing, 18) // beside the notch, in the menu-bar row
         }
-        .padding(.top, model.geometry.size.height + 4) // stay clear of the notch
-        .padding(.horizontal, 28).padding(.bottom, 16)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .transition(.opacity.animation(.easeOut(duration: 0.18).delay(0.14))) // appear after the shape has grown
     }
 }
