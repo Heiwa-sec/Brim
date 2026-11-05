@@ -8,7 +8,7 @@ extension Notification.Name {
 
 /// An opt-in full-screen Now Playing view: drifting blurred artwork, the cover, and big synced lyrics.
 /// macOS draws nothing from other apps over the lock screen, so this is a normal window and never touches the lock.
-/// ⌥⌘L toggles it; any key, or a click on the empty background, closes it.
+/// ⌥⌘L toggles it; Esc, or a click on the empty background, closes it. The transport buttons hide after 3 s without input.
 @MainActor
 final class FullScreenController {
     private static let duration = 0.5
@@ -34,6 +34,7 @@ final class FullScreenController {
         guard panels.isEmpty else { return hide() }
         guard nowPlaying.info != nil else { return } // nothing playing, nothing to show
         state.shown = false
+        state.poke()
         panels = NSScreen.screens.map(makePanel)
         NSApp.activate()
         panels.first?.makeKey()
@@ -44,6 +45,7 @@ final class FullScreenController {
     private func hide() {
         guard !panels.isEmpty, !closing else { return }
         closing = true
+        state.stop()
         withAnimation(Self.animation) { state.shown = false }
         DispatchQueue.main.asyncAfter(deadline: .now() + Self.duration) { [weak self] in
             guard let self else { return }
@@ -59,6 +61,7 @@ final class FullScreenController {
     private func makePanel(for screen: NSScreen) -> NSPanel {
         let panel = DismissPanel(contentRect: screen.frame, styleMask: [.borderless], backing: .buffered, defer: false)
         panel.onDismiss = { [weak self] in self?.hide() }
+        panel.onActivity = { [weak self] in self?.state.poke() }
         panel.isOpaque = false
         panel.backgroundColor = .clear // the view draws the black, so it can grow out of the notch
         panel.level = .screenSaver
@@ -69,19 +72,38 @@ final class FullScreenController {
     }
 }
 
-/// Closes on the first key press. Clicks are left to the view, so the scrubber and lyrics can use them.
+/// Esc closes; any other key only wakes the controls. Clicks are left to the view, so the scrubber and lyrics can use them.
 private final class DismissPanel: NSPanel {
     var onDismiss: (() -> Void)?
+    var onActivity: (() -> Void)?
 
     override var canBecomeKey: Bool { true }
 
     override func sendEvent(_ event: NSEvent) {
-        if event.type == .keyDown { onDismiss?() } else { super.sendEvent(event) }
+        guard event.type == .keyDown else { return super.sendEvent(event) }
+        if event.keyCode == 53 { onDismiss?() } else { onActivity?() }
     }
 }
 
 @MainActor @Observable
-private final class FullScreenState { var shown = false }
+private final class FullScreenState {
+    var shown = false
+    var controlsVisible = true
+    @ObservationIgnored private var hideWork: DispatchWorkItem?
+
+    /// Shows the controls and restarts the 3 s countdown to hide them: one one-shot timer, nothing polls.
+    func poke() {
+        if !controlsVisible { withAnimation(.easeInOut(duration: 0.25)) { controlsVisible = true } }
+        hideWork?.cancel()
+        let work = DispatchWorkItem { [weak self] in
+            MainActor.assumeIsolated { withAnimation(.easeInOut(duration: 0.4)) { self?.controlsVisible = false } }
+        }
+        hideWork = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3, execute: work)
+    }
+
+    func stop() { hideWork?.cancel() }
+}
 
 private struct FullScreenView: View {
     let nowPlaying: NowPlayingModule
@@ -102,12 +124,17 @@ private struct FullScreenView: View {
                     }
                     .frame(width: 420)
                     ScrubberView(module: nowPlaying).frame(width: 420)
+                    TransportView(module: nowPlaying, scale: 1.5)
+                        .frame(width: 420)
+                        .opacity(state.controlsVisible ? 1 : 0)
+                        .allowsHitTesting(state.controlsVisible)
                 }
                 if !lyrics.lines.isEmpty { LyricsView(module: lyrics, width: 640, fontSize: 40).frame(maxHeight: 760) }
             }
             .foregroundStyle(.white)
             .padding(60)
         }
+        .onContinuousHover { _ in state.poke() }
         .background(Color.black)
         .clipShape(RoundedRectangle(cornerRadius: state.shown ? 0 : 60))
         // Grows out of, and shrinks back into, the top centre where the notch is.

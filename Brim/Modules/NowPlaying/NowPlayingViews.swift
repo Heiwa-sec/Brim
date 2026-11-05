@@ -57,14 +57,15 @@ struct NowPlayingExpandedView: View {
 
 struct TransportView: View {
     let module: NowPlayingModule
+    var scale: CGFloat = 1
 
     var body: some View {
-        HStack(spacing: 26) {
-            button("backward.fill", .previous, size: 15)
-            button(module.info?.playing == true ? "pause.fill" : "play.fill", .togglePlayPause, size: 20)
-            button("forward.fill", .next, size: 15)
+        HStack(spacing: 26 * scale) {
+            button("backward.fill", .previous, size: 15 * scale)
+            button(module.info?.playing == true ? "pause.fill" : "play.fill", .togglePlayPause, size: 20 * scale)
+            button("forward.fill", .next, size: 15 * scale)
         }
-        .padding(.horizontal, 22).padding(.vertical, 7)
+        .padding(.horizontal, 22 * scale).padding(.vertical, 7 * scale)
         .glassEffect(in: .capsule)
         .frame(maxWidth: .infinity)
     }
