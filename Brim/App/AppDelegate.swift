@@ -6,7 +6,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         let nowPlaying = NowPlayingModule()
-        let host = ModuleHost(modules: [nowPlaying, LyricsModule(nowPlaying: nowPlaying), FileTrayModule(), ChargingModule(), BluetoothModule(), WeatherModule()])
+        let host = ModuleHost(modules: [nowPlaying, LyricsModule(nowPlaying: nowPlaying), FileTrayModule(), ChargingModule(), BluetoothModule(), WeatherModule(), HUDModule()])
         self.host = host
         displays = DisplayManager(host: host)
     }
