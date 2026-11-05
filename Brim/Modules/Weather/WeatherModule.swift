@@ -45,6 +45,8 @@ final class WeatherModule: NSObject, IslandModule, CLLocationManagerDelegate {
     }
 
     private func refreshIfStale() {
+        // Without access requestLocation only fails and would overwrite the permission message.
+        guard [.authorizedAlways, .authorized].contains(manager.authorizationStatus) else { return }
         if let fetched, Date.now.timeIntervalSince(fetched) < WeatherInfo.cacheSeconds { return }
         manager.requestLocation()
     }
