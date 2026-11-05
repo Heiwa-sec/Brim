@@ -8,8 +8,6 @@ extension WeatherModule {
 }
 
 struct WeatherView: View {
-    static let width: CGFloat = 215 // same column width as the tray
-
     let info: WeatherInfo
 
     var body: some View {
@@ -23,6 +21,6 @@ struct WeatherView: View {
             Text(info.description).font(.caption).foregroundStyle(.white.opacity(0.7))
         }
         .foregroundStyle(.white)
-        .frame(width: Self.width, alignment: .leading)
+        .frame(width: FileTrayView.width, alignment: .leading)
     }
 }
