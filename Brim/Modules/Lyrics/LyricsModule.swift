@@ -5,6 +5,7 @@ import SwiftUI
 @MainActor @Observable
 final class LyricsModule: IslandModule {
     static let id = "lyrics"
+    static let title = "Lyrics"
 
     let nowPlaying: NowPlayingModule
     private(set) var lines: [LyricLine] = []

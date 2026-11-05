@@ -6,6 +6,7 @@ import IOBluetooth
 @MainActor @Observable
 final class BluetoothModule: IslandModule {
     static let id = "bluetooth"
+    static let title = "Bluetooth"
     static let flashSeconds = 4.0
 
     struct Device: Identifiable, Equatable {
@@ -83,17 +84,24 @@ final class BluetoothModule: IslandModule {
     }
 }
 
-/// IOBluetooth delivers notifications through target/selector, which needs an NSObject.
-@MainActor
-private final class Listener: NSObject {
-    let onConnect: (IOBluetoothDevice) -> Void
-    let onDisconnect: (IOBluetoothDevice) -> Void
+/// IOBluetooth delivers notifications through target/selector, which needs an NSObject, and calls them on a background
+/// thread (it crashed the app on the first real connect), so each one hops to the main actor.
+private final class Listener: NSObject, @unchecked Sendable {
+    let onConnect: @MainActor (IOBluetoothDevice) -> Void
+    let onDisconnect: @MainActor (IOBluetoothDevice) -> Void
 
-    init(onConnect: @escaping (IOBluetoothDevice) -> Void, onDisconnect: @escaping (IOBluetoothDevice) -> Void) {
+    init(onConnect: @escaping @MainActor (IOBluetoothDevice) -> Void, onDisconnect: @escaping @MainActor (IOBluetoothDevice) -> Void) {
         self.onConnect = onConnect
         self.onDisconnect = onDisconnect
     }
 
-    @objc func connected(_ notification: IOBluetoothUserNotification, device: IOBluetoothDevice) { onConnect(device) }
-    @objc func disconnected(_ notification: IOBluetoothUserNotification, device: IOBluetoothDevice) { onDisconnect(device) }
+    @objc func connected(_ notification: IOBluetoothUserNotification, device: IOBluetoothDevice) {
+        nonisolated(unsafe) let device = device
+        DispatchQueue.main.async { MainActor.assumeIsolated { self.onConnect(device) } }
+    }
+
+    @objc func disconnected(_ notification: IOBluetoothUserNotification, device: IOBluetoothDevice) {
+        nonisolated(unsafe) let device = device
+        DispatchQueue.main.async { MainActor.assumeIsolated { self.onDisconnect(device) } }
+    }
 }

@@ -9,6 +9,7 @@ enum MediaCommand: Int {
 @MainActor @Observable
 final class NowPlayingModule: IslandModule {
     static let id = "nowPlaying"
+    static let title = "Now Playing"
 
     private(set) var info: NowPlayingInfo?
     private(set) var artwork: NSImage?

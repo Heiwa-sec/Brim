@@ -1,7 +1,6 @@
 import AppKit
 
-/// Per-display options, stored in UserDefaults under `display.<uuid>.<key>`. The settings UI arrives in phase (f);
-/// until then set them with `defaults write dev.brim.Brim display.<uuid>.hideUntilTop -bool true`.
+/// Per-display options, stored in UserDefaults under `display.<uuid>.<key>` and edited in Settings (Displays tab).
 struct DisplaySettings {
     let id: String
 

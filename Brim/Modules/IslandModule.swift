@@ -5,6 +5,8 @@ import Observation
 @MainActor
 protocol IslandModule: AnyObject, Observable {
     static var id: String { get }
+    /// Name shown in Settings.
+    static var title: String { get }
     /// Whether the module runs before the user has set `module.<id>.enabled`.
     static var defaultEnabled: Bool { get }
     /// Subscribe to OS events. Called when the module is switched on.

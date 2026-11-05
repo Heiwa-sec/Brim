@@ -63,6 +63,12 @@ struct IslandView: View {
                     .glassEffect(in: .capsule)
             }
         }
+        .overlay(alignment: .topTrailing) {
+            Button { SettingsWindow.shared.show() } label: { Image(systemName: "gearshape.fill").font(.system(size: 12)) }
+                .buttonStyle(.plain)
+                .foregroundStyle(.white.opacity(0.5))
+                .padding(.top, model.geometry.size.height + 4).padding(.trailing, 4)
+        }
         .padding(.top, model.geometry.size.height + 4) // stay clear of the notch
         .padding(.horizontal, 28).padding(.bottom, 16)
         .frame(maxWidth: .infinity, maxHeight: .infinity)

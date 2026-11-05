@@ -8,6 +8,7 @@ import SwiftUI
 @MainActor @Observable
 final class HUDModule: IslandModule {
     static let id = "hud"
+    static let title = "Volume and brightness HUD"
     static let defaultEnabled = false
     static let showSeconds = 1.5
 

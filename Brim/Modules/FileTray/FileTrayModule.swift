@@ -5,6 +5,7 @@ import SwiftUI
 @MainActor @Observable
 final class FileTrayModule: IslandModule {
     static let id = "fileTray"
+    static let title = "File tray"
 
     private(set) var items: [URL] = []
 

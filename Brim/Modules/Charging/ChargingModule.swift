@@ -7,6 +7,7 @@ import SwiftUI
 @MainActor @Observable
 final class ChargingModule: IslandModule {
     static let id = "charging"
+    static let title = "Charging"
     static let flashSeconds = 4.0
 
     private(set) var info: PowerInfo?

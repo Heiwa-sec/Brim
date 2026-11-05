@@ -21,7 +21,7 @@ Target: macOS 26+, Apple Silicon, Swift 6, SwiftUI plus AppKit, agent app (`LSUI
 | c Lyrics | Done, committed, **verified live by the maintainer (2026-11-05)** | Apple Music text style: 21 pt bold, current line gradient, others white 35% |
 | d File tray | Done, committed, **verified live by the maintainer (2026-11-05)** | Drop, drag out, Clear, three columns all work |
 | e System (plan: the phase plan (kept outside the repo)) | e1 Charging, e2 Bluetooth, e3 Weather, e4 HUD all built, merged and committed; **none tested live by the maintainer yet** | Weather and HUD are off by default |
-| f Settings and polish | | |
+| f Settings and polish | Built and committed (settings window, 4 tabs); awaiting the maintainer's test. Per-display and hover options exist; polish items not done | Plan: the phase plan (kept outside the repo) |
 | g Notification mirroring | | |
 | h Lock-screen integration | | |
 
@@ -57,6 +57,7 @@ Phase (d) as built: `Brim/Modules/FileTray/` holds `FileTrayModule` (file URLs i
 - **Lock test was too short.** The spike log showed LOCKED then UNLOCKED two seconds apart. Re-test with a longer lock (see below) before phase (h). Not blocking phases (c) to (g).
 
 ### Session log
+- **2026-11-05 (phase f):** Settings window (`Brim/Settings/`): General (launch at login via SMAppService, hover delay), Modules (toggle per module), Displays (per screen), Permissions (status plus Open buttons). Opens from the island gear, ⌥⌘, (Carbon hot key, no permission) or relaunching Brim. Live launch found a real crash in e2: IOBluetooth calls the connect notification on a background thread and the `@MainActor` listener trapped; fixed by hopping to the main actor.
 - **2026-11-05 (phase e run):** phase (e) sub-phases e1 to e4 built and merged; 34 tests pass; idle 0.00% CPU, 15 MB, 0 leaks. Awaiting the maintainer's live tests.
 - **2026-11-05 (later, the maintainer confirmed phases c and d work):** phase (c) verified by the maintainer (the earlier "no lyrics" was an instrumental track; LRCLIB has no lyrics for it). Lyrics restyled like Apple Music. Phase (d) File tray built and committed: build and 20 tests pass; synthesized drag from Finder, drag-out to a folder and Clear all work; idle 0 leaks, main thread in `mach_msg`, 24 MB with the lyrics cache and artwork loaded.
 - **2026-11-05:** phase (c) Lyrics built and committed; build and 20 tests pass; app idle: 0 leaks, 12 MB, nothing running in a 3 s stack sample (CPU readings were noisy on this machine: 0.5 to 0.6% for this build against 2.0% for the previous commit measured minutes later, so no regression). Live test with real music is still owed.
@@ -106,7 +107,7 @@ Do not run `leaks` while hover-testing: it suspends the process.
 - `LockSpike/`: throwaway lock-screen prototype, deleted after phase (h).
 - `BrimTests/`: unit tests. Pure files are compiled straight into the test bundle, so tests never launch the app.
 
-## Per-display settings (until the settings UI in phase f)
+## Per-display settings (also in Settings, Displays tab)
 
 Keys are `display.<display-uuid>.enabled` and `display.<display-uuid>.hideUntilTop`, plus a global `hoverDelay` (seconds, default 0.12).
 ```

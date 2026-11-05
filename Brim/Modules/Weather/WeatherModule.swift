@@ -6,6 +6,7 @@ import CoreLocation
 @MainActor @Observable
 final class WeatherModule: NSObject, IslandModule, CLLocationManagerDelegate {
     static let id = "weather"
+    static let title = "Weather"
     static let defaultEnabled = false
 
     private(set) var info: WeatherInfo?
