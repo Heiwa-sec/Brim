@@ -24,7 +24,7 @@ Target: macOS 26+, Apple Silicon, Swift 6, SwiftUI plus AppKit, agent app (`LSUI
 
 ### Published
 
-To ship a new version: bump `CFBundleShortVersionString` in `project.yml`, run `./scripts/release.sh`, then `gh release create vX.Y build/release/Brim.zip build/release/Brim.zip.sha256 --repo Heiwa-sec/Brim`. `gh` is installed with Homebrew and signed in as Heiwa-sec.
+To ship a new version: bump `CFBundleShortVersionString` and `CFBundleVersion` in `project.yml`, run `./scripts/release.sh`, then `gh release create vX.Y build/release/Brim.zip build/release/Brim.zip.sha256 --repo Heiwa-sec/Brim`. `gh` is installed with Homebrew and signed in as Heiwa-sec.
 
 Security audit done 2026-11-05: no secrets in code or history, only two HTTPS calls, reply-size caps added, hardened runtime on, no dead code. Open limits: not sandboxed, one private macOS function (brightness), media helper runs through `/usr/bin/perl`, vendored mediaremote-adapter not read beyond its license.
 

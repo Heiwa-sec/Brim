@@ -27,6 +27,8 @@ targets:
       properties:
         LSUIElement: true
         CFBundleName: Brim
+        CFBundleShortVersionString: "1.1"
+        CFBundleVersion: "2"
         NSPrincipalClass: NSApplication
         NSLocationWhenInUseUsageDescription: Brim uses your approximate location (about 10 km) to show the local weather.
     settings:
