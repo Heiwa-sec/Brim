@@ -6,6 +6,8 @@ struct LyricsView: View {
     let module: LyricsModule
     var width: CGFloat = Self.width
     var fontSize: CGFloat = 21
+    /// Lines dim the further they are from the current one, and ease in and out as the current line moves.
+    var fadeByDistance = false
 
     var body: some View {
         let lines = module.lines
@@ -32,7 +34,7 @@ struct LyricsView: View {
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 14) {
                     ForEach(lines.indices, id: \.self) { index in
-                        line(lines[index], isCurrent: index == current)
+                        line(lines[index], isCurrent: index == current, distance: current.map { abs(index - $0) } ?? 0)
                             .id(index)
                             .onTapGesture { module.nowPlaying.seek(to: lines[index].time) }
                     }
@@ -49,10 +51,12 @@ struct LyricsView: View {
                              startPoint: .top, endPoint: .bottom))
     }
 
-    private func line(_ line: LyricLine, isCurrent: Bool) -> some View {
+    private func line(_ line: LyricLine, isCurrent: Bool, distance: Int) -> some View {
         Text(line.text.isEmpty ? "♪" : line.text)
             .font(.system(size: fontSize, weight: .bold)) // Apple Music style: one big bold size, so lines never rewrap when highlighted
-            .foregroundStyle(isCurrent ? AnyShapeStyle(gradient) : AnyShapeStyle(.white.opacity(0.35)))
+            .foregroundStyle(isCurrent ? AnyShapeStyle(gradient) : AnyShapeStyle(.white.opacity(fadeByDistance ? max(0.12, 0.5 - 0.1 * Double(distance)) : 0.35)))
+            .animation(.easeInOut(duration: 0.45), value: isCurrent)
+            .animation(.easeInOut(duration: 0.45), value: distance)
             .frame(maxWidth: .infinity, alignment: .leading)
             .contentShape(Rectangle())
     }

@@ -129,7 +129,7 @@ private struct FullScreenView: View {
                         .opacity(state.controlsVisible ? 1 : 0)
                         .allowsHitTesting(state.controlsVisible)
                 }
-                if !lyrics.lines.isEmpty { LyricsView(module: lyrics, width: 640, fontSize: 40).frame(maxHeight: 760) }
+                if !lyrics.lines.isEmpty { LyricsView(module: lyrics, width: 780, fontSize: 56, fadeByDistance: true).frame(maxHeight: 900) }
             }
             .foregroundStyle(.white)
             .padding(60)
