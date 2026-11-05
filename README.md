@@ -20,12 +20,15 @@ Target: macOS 26+, Apple Silicon, Swift 6, SwiftUI plus AppKit, agent app (`LSUI
 | b Now Playing | Done, committed, **verified live by the maintainer (2026-11-04)** | Real playback works; buttons respond on the first click |
 | c Lyrics | Done, committed, **verified live by the maintainer (2026-11-05)** | Apple Music text style: 21 pt bold, current line gradient, others white 35% |
 | d File tray | Done, committed, **verified live by the maintainer (2026-11-05)** | Drop, drag out, Clear, three columns all work |
-| e Charging, Bluetooth/AirPods, weather, HUD | | |
+| e System (plan: the phase plan (kept outside the repo)) | e1 Charging built and committed, **awaiting the maintainer's plug test**; e2 Bluetooth, e3 weather, e4 HUD not started | |
 | f Settings and polish | | |
 | g Notification mirroring | | |
 | h Lock-screen integration | | |
 
 ### Next step
+the maintainer tests e1 Charging (plug and unplug the charger: bolt and percent flash in the ears for 4 s; hover while on AC shows a Battery column; on battery there is no column). Then e2 Bluetooth/AirPods, e3 weather (CoreLocation reduced accuracy), e4 HUD (key tap spike first), each built, tested and committed in turn per the phase plan (kept outside the repo). Still open: the longer lock-screen re-test before phase (h).
+
+Phase (e1) as built: `Brim/Modules/Charging/` holds `PowerInfo` (pure, tested, parses the IOKit description), `ChargingModule` (`IOPSNotificationCreateRunLoopSource` on the main run loop; flashes `hasActivity` for 4 s only when the AC state changes, using one one-shot work item) and `ChargingView`. Idle: 0.00% CPU, 13 MB, 0 leaks. Not tested here: a real plug event (the Mac was on battery).
 
 Phase (d) as built: `Brim/Modules/FileTray/` holds `FileTrayModule` (file URLs in memory, de-duplicated; nothing copied; cleared on quit) and `FileTrayView` (215 pt column: count, Clear, a row of icons that drag out). `IslandModule` gained `receive(_:)` (default false) and `ModuleHost.drop(_:)`; `IslandView` has the drop destination. The controller's event mask now includes `leftMouseDragged`, so dragging a file to the notch opens the island like hovering does. Not done on purpose: persistence across relaunch, removing a single item, a compact-pill indicator.
 
