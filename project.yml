@@ -54,7 +54,7 @@ targets:
   BrimTests:
     type: bundle.unit-test
     platform: macOS
-    sources: [BrimTests, Brim/Island/NotchGeometry.swift, Brim/Modules/NowPlaying/NowPlayingInfo.swift, Brim/Modules/Lyrics/LRC.swift, Brim/Modules/Lyrics/ArtworkPalette.swift, Brim/Modules/Charging/PowerInfo.swift]
+    sources: [BrimTests, Brim/Island/NotchGeometry.swift, Brim/Modules/NowPlaying/NowPlayingInfo.swift, Brim/Modules/Lyrics/LRC.swift, Brim/Modules/Lyrics/ArtworkPalette.swift, Brim/Modules/Charging/PowerInfo.swift, Brim/Modules/HUD/HUDKey.swift]
     settings:
       base:
         GENERATE_INFOPLIST_FILE: YES
