@@ -19,14 +19,13 @@ Target: macOS 26+, Apple Silicon, Swift 6, SwiftUI plus AppKit, agent app (`LSUI
 | a Panel, geometry, states | Done, committed | Expands from the notch (fixed: window pre-grows before the spring starts) |
 | b Now Playing | Done, committed, **verified live by the maintainer (2026-11-04)** | Real playback works; buttons respond on the first click |
 | c Lyrics | Done, committed, **verified live by the maintainer (2026-11-05)** | Apple Music text style: 21 pt bold, current line gradient, others white 35% |
-| d File tray | Built, committed. Drop and drag-out verified with synthesized events; **not yet tried by the maintainer** | See "Next step" |
+| d File tray | Done, committed, **verified live by the maintainer (2026-11-05)** | Drop, drag out, Clear, three columns all work |
 | e Charging, Bluetooth/AirPods, weather, HUD | | |
 | f Settings and polish | | |
 | g Notification mirroring | | |
 | h Lock-screen integration | | |
 
 ### Next step
-the maintainer tries phase (d), the file tray, then phase (e) starts (plan first). Live test: drag a file from Finder up to the notch. The island opens and shows "Drop to add to tray"; drop it and a Tray column appears (icon, name, count). Also check: a second file adds a second item and the same file twice adds nothing; drag an item out to a folder or the Desktop (Finder copies it); "Clear" empties the tray and the island narrows; with music playing the island shows three columns (player, lyrics, tray); `defaults write dev.brim.Brim module.fileTray.enabled -bool false` removes the column and refuses drops.
 
 Phase (d) as built: `Brim/Modules/FileTray/` holds `FileTrayModule` (file URLs in memory, de-duplicated; nothing copied; cleared on quit) and `FileTrayView` (215 pt column: count, Clear, a row of icons that drag out). `IslandModule` gained `receive(_:)` (default false) and `ModuleHost.drop(_:)`; `IslandView` has the drop destination. The controller's event mask now includes `leftMouseDragged`, so dragging a file to the notch opens the island like hovering does. Not done on purpose: persistence across relaunch, removing a single item, a compact-pill indicator.
 
@@ -47,7 +46,7 @@ Phase (d) as built: `Brim/Modules/FileTray/` holds `FileTrayModule` (file URLs i
 - **Lock test was too short.** The spike log showed LOCKED then UNLOCKED two seconds apart. Re-test with a longer lock (see below) before phase (h). Not blocking phases (c) to (g).
 
 ### Session log
-- **2026-11-05 (later):** phase (c) verified by the maintainer (the earlier "no lyrics" was an instrumental track; LRCLIB has no lyrics for it). Lyrics restyled like Apple Music. Phase (d) File tray built and committed: build and 20 tests pass; synthesized drag from Finder, drag-out to a folder and Clear all work; idle 0 leaks, main thread in `mach_msg`, 24 MB with the lyrics cache and artwork loaded.
+- **2026-11-05 (later, the maintainer confirmed phases c and d work):** phase (c) verified by the maintainer (the earlier "no lyrics" was an instrumental track; LRCLIB has no lyrics for it). Lyrics restyled like Apple Music. Phase (d) File tray built and committed: build and 20 tests pass; synthesized drag from Finder, drag-out to a folder and Clear all work; idle 0 leaks, main thread in `mach_msg`, 24 MB with the lyrics cache and artwork loaded.
 - **2026-11-05:** phase (c) Lyrics built and committed; build and 20 tests pass; app idle: 0 leaks, 12 MB, nothing running in a 3 s stack sample (CPU readings were noisy on this machine: 0.5 to 0.6% for this build against 2.0% for the previous commit measured minutes later, so no regression). Live test with real music is still owed.
 - **2026-11-04 (evening):** phases 0, (a) and (b) done and committed. Expand-from-notch fix done. the maintainer confirmed Now Playing works with real music and buttons need one click. Phase (c), Lyrics, is next and has not been started.
 
