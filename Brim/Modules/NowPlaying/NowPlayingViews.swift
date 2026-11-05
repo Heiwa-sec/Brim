@@ -37,7 +37,11 @@ struct NowPlayingExpandedView: View {
 
     var body: some View {
         HStack(spacing: 18) {
-            ArtworkView(image: module.artwork, size: 110, radius: 14)
+            Button { NotificationCenter.default.post(name: .brimFullScreen, object: nil) } label: {
+                ArtworkView(image: module.artwork, size: 110, radius: 14)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Show full screen")
             VStack(alignment: .leading, spacing: 8) {
                 VStack(alignment: .leading, spacing: 1) {
                     Text(module.info?.title ?? "").font(.headline).lineLimit(1)
