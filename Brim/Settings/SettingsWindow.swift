@@ -32,12 +32,12 @@ final class SettingsWindow {
             GetEventParameter(event, EventParamName(kEventParamDirectObject), EventParamType(typeEventHotKeyID), nil, MemoryLayout<EventHotKeyID>.size, nil, &id)
             DispatchQueue.main.async {
                 MainActor.assumeIsolated {
-                    if id.id == 1 { SettingsWindow.shared.show() } else { NotificationCenter.default.post(name: .brimLockNow, object: nil) }
+                    if id.id == 1 { SettingsWindow.shared.show() } else { NotificationCenter.default.post(name: .brimFullScreen, object: nil) }
                 }
             }
             return noErr
         }, 1, &spec, nil, nil)
-        // ⌥⌘, opens settings; ⌥⌘L shows Now Playing, then locks.
+        // ⌥⌘, opens settings; ⌥⌘L toggles full-screen Now Playing.
         for (n, key) in [kVK_ANSI_Comma, kVK_ANSI_L].enumerated() {
             RegisterEventHotKey(UInt32(key), UInt32(cmdKey | optionKey), EventHotKeyID(signature: OSType(0x4252494D), id: UInt32(n + 1)),
                                 GetApplicationEventTarget(), 0, &hotKeys[n])

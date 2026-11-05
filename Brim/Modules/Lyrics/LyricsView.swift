@@ -4,6 +4,8 @@ struct LyricsView: View {
     static let width: CGFloat = 250
 
     let module: LyricsModule
+    var width: CGFloat = Self.width
+    var fontSize: CGFloat = 21
 
     var body: some View {
         let lines = module.lines
@@ -13,7 +15,7 @@ struct LyricsView: View {
         TimelineView(.explicit([.now] + wakeDates(lines: lines, info: info))) { context in
             column(lines: lines, current: LRC.index(at: info?.position(at: context.date) ?? 0, in: lines))
         }
-        .frame(width: Self.width)
+        .frame(width: width)
     }
 
     private func wakeDates(lines: [LyricLine], info: NowPlayingInfo?) -> [Date] {
@@ -49,7 +51,7 @@ struct LyricsView: View {
 
     private func line(_ line: LyricLine, isCurrent: Bool) -> some View {
         Text(line.text.isEmpty ? "♪" : line.text)
-            .font(.system(size: 21, weight: .bold)) // Apple Music style: one big bold size, so lines never rewrap when highlighted
+            .font(.system(size: fontSize, weight: .bold)) // Apple Music style: one big bold size, so lines never rewrap when highlighted
             .foregroundStyle(isCurrent ? AnyShapeStyle(gradient) : AnyShapeStyle(.white.opacity(0.35)))
             .frame(maxWidth: .infinity, alignment: .leading)
             .contentShape(Rectangle())

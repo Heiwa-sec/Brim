@@ -54,7 +54,7 @@ private struct GeneralTab: View {
             }
             Text("How long the pointer rests on the notch before the island opens.").font(.caption).foregroundStyle(.secondary)
             Text("Open these settings any time with ⌥⌘, or the gear in the island.").font(.caption).foregroundStyle(.secondary)
-            Text("⌥⌘L shows what is playing full screen for 3 seconds, then locks the Mac. Press it again to cancel.").font(.caption).foregroundStyle(.secondary)
+            Text("⌥⌘L shows what is playing full screen, with lyrics. Press any key or click to close it.").font(.caption).foregroundStyle(.secondary)
         }
         .formStyle(.grouped)
     }
