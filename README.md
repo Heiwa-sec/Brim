@@ -20,15 +20,23 @@ Target: macOS 26+, Apple Silicon, Swift 6, SwiftUI plus AppKit, agent app (`LSUI
 | b Now Playing | Done, committed, **verified live by the maintainer (2026-11-04)** | Real playback works; buttons respond on the first click |
 | c Lyrics | Done, committed, **verified live by the maintainer (2026-11-05)** | Apple Music text style: 21 pt bold, current line gradient, others white 35% |
 | d File tray | Done, committed, **verified live by the maintainer (2026-11-05)** | Drop, drag out, Clear, three columns all work |
-| e System (plan: the phase plan (kept outside the repo)) | e1 Charging built and committed, **awaiting the maintainer's plug test**; e2 Bluetooth, e3 weather, e4 HUD not started | |
+| e System (plan: the phase plan (kept outside the repo)) | e1 Charging, e2 Bluetooth, e3 Weather, e4 HUD all built, merged and committed; **none tested live by the maintainer yet** | Weather and HUD are off by default |
 | f Settings and polish | | |
 | g Notification mirroring | | |
 | h Lock-screen integration | | |
 
 ### Next step
-the maintainer tests e1 Charging (plug and unplug the charger: bolt and percent flash in the ears for 4 s; hover while on AC shows a Battery column; on battery there is no column). Then e2 Bluetooth/AirPods, e3 weather (CoreLocation reduced accuracy), e4 HUD (key tap spike first), each built, tested and committed in turn per the phase plan (kept outside the repo). Still open: the longer lock-screen re-test before phase (h).
+the maintainer tests phase (e) live, one module at a time (checklists below). Then phase (f), Settings and polish: the toggles replace the `defaults write` switches used now. Still open: the longer lock-screen re-test before phase (h).
+
+**Test checklists (phase e)**
+- *e1 Charging:* plug/unplug the charger: bolt (or battery) plus percent flash in the ears for 4 s. Hover on AC: Battery column. On battery: no column.
+- *e2 Bluetooth:* allow the Bluetooth prompt. Connect AirPods: headphones glyph plus lowest earbud % flash for 4 s; hover lists connected devices with `L/R/Case` %. Disconnect: column goes. Off switch: `defaults write dev.brim.Brim module.bluetooth.enabled -bool false`. Known gap: battery is read once at connect; AirPods that report it late show name only until the next connect.
+- *e3 Weather (off by default):* `defaults write dev.brim.Brim module.weather.enabled -bool true`, relaunch, allow Location, hover: symbol, temperature, description. Cache 30 min; refetch only on wake or location change. If the Location prompt never appears for an agent app, report it. Network: api.open-meteo.com only.
+- *e4 HUD (off by default):* `defaults write dev.brim.Brim module.hud.enabled -bool true`, add Brim in Accessibility, then volume, mute and brightness keys: system HUD suppressed, our symbol plus bar in the ears for 1.5 s, 1/16 per press. Without Accessibility the island says so and keys behave normally. This is the spike: if brightness keys never reach the tap, say so and we add the listener fallback. Keyboard backlight keys are not handled.
 
 Phase (e1) as built: `Brim/Modules/Charging/` holds `PowerInfo` (pure, tested, parses the IOKit description), `ChargingModule` (`IOPSNotificationCreateRunLoopSource` on the main run loop; flashes `hasActivity` for 4 s only when the AC state changes, using one one-shot work item) and `ChargingView`. Idle: 0.00% CPU, 13 MB, 0 leaks. Not tested here: a real plug event (the Mac was on battery).
+
+Phases e2 to e4 as built: `Bluetooth/` (IOBluetooth connect/disconnect notifications, private battery properties behind `responds(to:)`, `BluetoothBattery` pure and tested), `Weather/` (CoreLocation reduced accuracy, Open-Meteo, `WeatherInfo` pure and tested), `HUD/` (`CGEventTap` on `NX_SYSDEFINED`, CoreAudio volume, DisplayServices brightness via dlsym, `HUDKey` pure and tested). `IslandModule` gained `static defaultEnabled` (default true; weather and HUD are false). They were built in parallel git worktrees, reviewed, then merged. Not run live: the Mac had no Bluetooth device connected, no Accessibility grant, no Location grant. Idle with all defaults: 0.00% CPU, 15 MB, 0 leaks (the first 30 s after launch read about 1% while IOBluetooth initialises; ignore it).
 
 Phase (d) as built: `Brim/Modules/FileTray/` holds `FileTrayModule` (file URLs in memory, de-duplicated; nothing copied; cleared on quit) and `FileTrayView` (215 pt column: count, Clear, a row of icons that drag out). `IslandModule` gained `receive(_:)` (default false) and `ModuleHost.drop(_:)`; `IslandView` has the drop destination. The controller's event mask now includes `leftMouseDragged`, so dragging a file to the notch opens the island like hovering does. Not done on purpose: persistence across relaunch, removing a single item, a compact-pill indicator.
 
@@ -49,6 +57,7 @@ Phase (d) as built: `Brim/Modules/FileTray/` holds `FileTrayModule` (file URLs i
 - **Lock test was too short.** The spike log showed LOCKED then UNLOCKED two seconds apart. Re-test with a longer lock (see below) before phase (h). Not blocking phases (c) to (g).
 
 ### Session log
+- **2026-11-05 (phase e run):** phase (e) sub-phases e1 to e4 built and merged; 34 tests pass; idle 0.00% CPU, 15 MB, 0 leaks. Awaiting the maintainer's live tests.
 - **2026-11-05 (later, the maintainer confirmed phases c and d work):** phase (c) verified by the maintainer (the earlier "no lyrics" was an instrumental track; LRCLIB has no lyrics for it). Lyrics restyled like Apple Music. Phase (d) File tray built and committed: build and 20 tests pass; synthesized drag from Finder, drag-out to a folder and Clear all work; idle 0 leaks, main thread in `mach_msg`, 24 MB with the lyrics cache and artwork loaded.
 - **2026-11-05:** phase (c) Lyrics built and committed; build and 20 tests pass; app idle: 0 leaks, 12 MB, nothing running in a 3 s stack sample (CPU readings were noisy on this machine: 0.5 to 0.6% for this build against 2.0% for the previous commit measured minutes later, so no regression). Live test with real music is still owed.
 - **2026-11-04 (evening):** phases 0, (a) and (b) done and committed. Expand-from-notch fix done. the maintainer confirmed Now Playing works with real music and buttons need one click. Phase (c), Lyrics, is next and has not been started.
