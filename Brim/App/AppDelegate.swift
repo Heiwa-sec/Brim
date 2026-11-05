@@ -16,7 +16,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         SettingsWindow.shared.registerHotKey()
     }
 
-    func applicationWillTerminate(_ notification: Notification) { fullScreen?.shutdown() }
+    func applicationWillTerminate(_ notification: Notification) { fullScreen?.shutdownNow() }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         SettingsWindow.shared.show()
