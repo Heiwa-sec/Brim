@@ -56,22 +56,8 @@ targets:
   BrimTests:
     type: bundle.unit-test
     platform: macOS
-    sources: [BrimTests, Brim/Island/NotchGeometry.swift, Brim/Modules/NowPlaying/NowPlayingInfo.swift, Brim/Modules/Lyrics/LRC.swift, Brim/Modules/Lyrics/ArtworkPalette.swift, Brim/Modules/Charging/PowerInfo.swift, Brim/Modules/Weather/WeatherInfo.swift, Brim/Modules/Bluetooth/BluetoothBattery.swift, Brim/Modules/HUD/HUDKey.swift, Brim/Modules/Notifications/NotificationRecord.swift, Brim/LockScreen/KillSwitch.swift]
+    sources: [BrimTests, Brim/Island/NotchGeometry.swift, Brim/Modules/NowPlaying/NowPlayingInfo.swift, Brim/Modules/Lyrics/LRC.swift, Brim/Modules/Lyrics/ArtworkPalette.swift, Brim/Modules/Charging/PowerInfo.swift, Brim/Modules/Weather/WeatherInfo.swift, Brim/Modules/Bluetooth/BluetoothBattery.swift, Brim/Modules/HUD/HUDKey.swift, Brim/Modules/Notifications/NotificationRecord.swift]
     settings:
       base:
         GENERATE_INFOPLIST_FILE: YES
         PRODUCT_BUNDLE_IDENTIFIER: dev.brim.BrimTests
-  # Throwaway: answers "can a window render over the lock screen on this macOS?" Deleted after integration.
-  LockSpike:
-    type: application
-    platform: macOS
-    sources: [LockSpike]
-    info:
-      path: LockSpike/Info.plist
-      properties:
-        LSUIElement: true
-        CFBundleName: LockSpike
-    settings:
-      base:
-        PRODUCT_BUNDLE_IDENTIFIER: dev.brim.LockSpike
-        GENERATE_INFOPLIST_FILE: NO

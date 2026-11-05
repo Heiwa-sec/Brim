@@ -30,7 +30,6 @@ struct DefaultsToggle: View {
 
 private struct GeneralTab: View {
     @AppStorage("hoverDelay") private var hoverDelay = 0.12
-    @AppStorage("lockscreen.enabled") private var lockScreen = false
     @State private var launchAtLogin = SMAppService.mainApp.status == .enabled
     @State private var loginError: String?
 
@@ -47,11 +46,6 @@ private struct GeneralTab: View {
                     }
                 }
             if let loginError { Text(loginError).font(.caption).foregroundStyle(.red) }
-            Toggle("Show music on the lock screen (experimental)", isOn: $lockScreen)
-                .onChange(of: lockScreen) { _, on in if on { KillSwitch().reset() } }
-            if KillSwitch().tripped {
-                Text("Turned off automatically after two crashes while it was showing. Switch it off and on again to retry.").font(.caption).foregroundStyle(.orange)
-            }
             LabeledContent("Hover delay") {
                 HStack {
                     Slider(value: $hoverDelay, in: 0...0.6)
@@ -60,6 +54,7 @@ private struct GeneralTab: View {
             }
             Text("How long the pointer rests on the notch before the island opens.").font(.caption).foregroundStyle(.secondary)
             Text("Open these settings any time with ⌥⌘, or the gear in the island.").font(.caption).foregroundStyle(.secondary)
+            Text("⌥⌘L shows what is playing full screen for 3 seconds, then locks the Mac. Press it again to cancel.").font(.caption).foregroundStyle(.secondary)
         }
         .formStyle(.grouped)
     }

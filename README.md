@@ -23,12 +23,12 @@ Target: macOS 26+, Apple Silicon, Swift 6, SwiftUI plus AppKit, agent app (`LSUI
 | e System (plan: the phase plan (kept outside the repo)) | e1 Charging, e2 Bluetooth, e3 Weather, e4 HUD all built, merged and committed; **none tested live by the maintainer yet** | Weather and HUD are off by default |
 | f Settings and polish | Built and committed (settings window, 4 tabs); awaiting the maintainer's test. Per-display and hover options exist; polish items not done | Plan: the phase plan (kept outside the repo) |
 | g Notification mirroring | Built, committed and **checked here** (real notifications mirrored with Full Disk Access); off by default; awaiting the maintainer's test | Plan: the phase plan (kept outside the repo) |
-| h Lock-screen integration | Scaffolding built and committed (kill switch, lock controller, Settings toggle), off by default; **real lock-screen visibility still unverified** (needs the maintainer present with Touch ID) | Plan: the phase plan (kept outside the repo) |
+| h Lock-screen integration | Overlay approach **failed** (the maintainer, 2026-11-05: card never showed on the lock screen). Replaced by the ⌥⌘L fallback: full-screen Now Playing for 3 s, then Brim locks the Mac. Built, committed, panel checked here; **the real lock call is untested by the maintainer** | `LockSpike`, the kill switch and the Settings toggle were deleted |
 
 ### Next step
-the maintainer: (1) test charging and notifications at home; (2) the lock-screen test: Settings > General > "Show music on the lock screen (experimental)" on, play music, lock with ⌃⌘Q (Touch ID ready), wait about 10 seconds, unlock, then tell me whether a card with the track appeared on the lock screen. If it did not, phase (h) falls back to a pre-lock Now Playing panel (see `velvet-gathering-sparrow.md`); if it did, add transport buttons, lyrics and the presets. The old `LockSpike` test is no longer needed first. Delete `LockSpike/` once (h) is settled.
+the maintainer: (1) play music, press ⌥⌘L: the island-style full-screen card shows for 3 s, then the Mac locks (unlock with Touch ID). Press ⌥⌘L again during the 3 s to cancel. Tell me whether it locks and whether the card looks right. (2) Test charging and notifications at home. After that: optional extras on the card (lyrics line, transport buttons) if wanted.
 
-Phase (h) as built: `Brim/LockScreen/`: `KillSwitch` (pure, tested: `--disable-lockscreen`, session-open flag, two crashes in a row trip it; re-enabling resets), `LockScreenController` (listens for `com.apple.screenIsLocked/Unlocked`, shows a click-through, non-activating, shielding-level panel per screen with art, title and artist; only when a track exists). Rendering checked while unlocked by posting the lock notification from a script (never locked the Mac); the session flag set and cleared correctly.
+Phase (h) as built: `Brim/LockScreen/LockScreenController.swift`. The ⌥⌘L Carbon hot key (registered with ⌥⌘, in `SettingsWindow.registerHotKey`, dispatched by hot key id) posts `.brimLockNow`; the controller shows a `.screenSaver`-level black panel per screen with art, title and artist, then after 3 s hides it and calls the private `SACLockScreenImmediate` from login.framework (dlsym; if missing, the Mac just does not lock). No track playing: locks at once. Why not an overlay: see "Lock-screen findings".
 
 **Test checklist (phase g, notification mirroring; off by default)**
 Turn on "Notification mirroring" in Settings > Modules and add the app (or Terminal while running from it) to Full Disk Access; Settings > Permissions shows its state. Send yourself a Messages or Mail notification, or run `osascript -e 'display notification "hi" with title "t"'`: the island opens by itself for 5 s with an icon card. macOS writes the database a few seconds after it shows its own banner, so Brim's banner lags by about 5 s; this is the database, not Brim. Without Full Disk Access the island says so. Nothing is logged or stored.
@@ -59,9 +59,10 @@ Phase (d) as built: `Brim/Modules/FileTray/` holds `FileTrayModule` (file URLs i
 - **Not tested without music:** anything depending on real playback (lyrics, scrubber, buttons). Build the feature, then hand the maintainer an exact checklist.
 
 ### Open questions for the maintainer
-- **Lock test was too short.** The spike log showed LOCKED then UNLOCKED two seconds apart. Re-test with a longer lock (see below) before phase (h). Not blocking phases (c) to (g).
+None open except the ⌥⌘L lock test in "Next step".
 
 ### Session log
+- **2026-11-05 (lock fallback):** the maintainer reported the lock-screen card did not appear. Replaced the overlay with the ⌥⌘L pre-lock panel; deleted `LockSpike/`, `KillSwitch` (and its tests) and the Settings toggle; 37 tests pass. Panel and cancel verified by synthesizing the hot key; the real lock is owed by the maintainer.
 - **2026-11-05 (phase h scaffolding):** kill switch, lock controller and Settings toggle built; rendering verified by posting the lock notification while unlocked; 41 tests pass. The real lock-screen test is owed by the maintainer.
 - **2026-11-05 (phase g):** Notification mirroring built after the maintainer granted Full Disk Access. Schema checked on macOS 27 (db version 19): `record.data` is a bplist with `app`, `req.titl/subt/body`. Vnode source on `db-wal`; `IslandModule.wantsExpanded` plus `IslandModel.banner` open the island by themselves. Live test with `osascript display notification` worked; idle with the module on 0.0x% CPU.
 - **2026-11-05 (Bluetooth fixes):** IOBluetooth's private battery properties read 0 on macOS 27, so batteries now come from `system_profiler SPBluetoothDataType -json` (about 70 ms, run on connect, at start and once 3 s after a connect), matched by device name because its addresses differ from IOBluetooth's. Removed the private-API code. Gear button moved to the menu-bar row.
@@ -79,8 +80,7 @@ Phase (d) as built: `Brim/Modules/FileTray/` holds `FileTrayModule` (file URLs i
 - Private SkyLight space calls (`SLSSpaceAddWindowsAndRemoveFromSpaces`, `SLSAddWindowsToSpaces`, `SLSMoveWindowsToManagedSpace`, `SLSShowSpaces`) are all rejected with `0xB0000000` for a normally signed app on macOS 27.0.1, with call signatures matching the MIT SkyLightWindow reference. Likely an entitlement check in WindowServer; not obtainable with a free account.
 - The post-reboot login window (before the first sign-in) cannot show music: no user session exists. Only the lock screen is supported.
 
-**Safe re-test** (click-through, never takes focus, exits itself):
-`~/Developer/Brim/build/Build/Products/Debug/LockSpike.app/Contents/MacOS/LockSpike --seconds 60 --shield`, then lock with ⌃⌘Q, wait about 10 seconds with the screen locked, unlock with Touch ID, and send me `LockSpike/spike.log`.
+**Result (2026-11-05):** the shielding-level window never showed on the real lock screen, so the overlay idea is dead; see phase (h) above.
 
 ---
 
@@ -89,7 +89,7 @@ Phase (d) as built: `Brim/Modules/FileTray/` holds `FileTrayModule` (file URLs i
 - **Process:** plan first for new work; one phase at a time; each phase builds, runs, is checked for leaks and idle CPU, and is committed before the next.
 - **Code:** small files, comments only where the logic is not obvious, no dead code, no fake data.
 - **Privacy:** no analytics or telemetry. Only lyrics (LRCLIB) and weather (Open-Meteo) use the network, and both are toggleable.
-- **Safety:** the lock-screen widget must never take focus and must pass clicks through. Kill switch: `--disable-lockscreen` plus auto-disable after two crashes in a row. Never test lock behaviour without Touch ID available.
+- **Safety:** the pre-lock panel passes clicks through and never takes focus. Never test lock behaviour without Touch ID available.
 - **Event-driven only:** no polling timers. Allowed one-shots: hover delay, delayed panel shrink, next-lyric-line timer.
 
 ---
@@ -112,7 +112,6 @@ Do not run `leaks` while hover-testing: it suspends the process.
 - `Brim/Modules/`: `IslandModule` protocol and `ModuleHost` (starts/stops modules from `module.<id>.enabled`, default on); `NowPlaying/` holds the module, views, `MediaAdapter` (Perl child process) and `NowPlayingInfo` (pure, tested); `Lyrics/` is described under "Next step". Every module with expanded content becomes a column; `IslandModel.expandedColumns` widens the island.
 - `Vendor/mediaremote-adapter/`: BSD-3, unmodified; built as the embedded `MediaRemoteAdapter.framework` (bundled, not linked). `test.m` is excluded from the build.
 - `Brim/App/`: `main.swift` (explicit entry point; `@main` on a delegate would never create it without a nib), `AppDelegate`.
-- `LockSpike/`: throwaway lock-screen prototype, deleted after phase (h).
 - `BrimTests/`: unit tests. Pure files are compiled straight into the test bundle, so tests never launch the app.
 
 ## Per-display settings (also in Settings, Displays tab)

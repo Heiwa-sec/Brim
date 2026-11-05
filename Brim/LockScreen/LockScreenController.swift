@@ -1,53 +1,61 @@
 import AppKit
 import SwiftUI
 
-/// Shows a read-only now-playing card over the lock screen. Experimental: no public API puts a window there, so this uses
-/// a shielding-level window and may simply not be visible. The card never takes focus and passes every click through.
+extension Notification.Name {
+    /// Posted by the ⌥⌘L hot key.
+    static let brimLockNow = Notification.Name("dev.brim.Brim.lockNow")
+}
+
+/// macOS draws nothing from other apps over the lock screen, so Brim shows Now Playing full screen for a moment
+/// before it locks the Mac itself. Pressing the hot key again during that moment cancels the lock.
 @MainActor
 final class LockScreenController {
+    private static let delay: TimeInterval = 3
+
     private let nowPlaying: NowPlayingModule
-    private let killSwitch = KillSwitch()
     private var panels: [NSPanel] = []
-    private var observers: [NSObjectProtocol] = []
+    private var pending: DispatchWorkItem?
+    private var observer: NSObjectProtocol?
 
     init(nowPlaying: NowPlayingModule) {
         self.nowPlaying = nowPlaying
-        killSwitch.recordLaunch()
-        let center = DistributedNotificationCenter.default()
-        observers.append(center.addObserver(forName: .init("com.apple.screenIsLocked"), object: nil, queue: .main) { [weak self] _ in
-            MainActor.assumeIsolated { self?.show() }
-        })
-        observers.append(center.addObserver(forName: .init("com.apple.screenIsUnlocked"), object: nil, queue: .main) { [weak self] _ in
-            MainActor.assumeIsolated { self?.hide() }
-        })
+        observer = NotificationCenter.default.addObserver(forName: .brimLockNow, object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated { self?.toggle() }
+        }
     }
 
-    /// Hide and clear the flag on a clean quit, so only a crash leaves it set.
     func shutdown() { hide() }
 
-    private var enabled: Bool { UserDefaults.standard.bool(forKey: "lockscreen.enabled") }
-
-    private func show() {
-        guard enabled, !killSwitch.tripped, panels.isEmpty, nowPlaying.info != nil else { return } // nothing to show without a track
-        killSwitch.cardShown()
+    private func toggle() {
+        guard panels.isEmpty else { return hide() }
+        guard nowPlaying.info != nil else { return lock() } // nothing to show, so lock straight away
         panels = NSScreen.screens.map(makePanel)
+        let work = DispatchWorkItem { [weak self] in
+            MainActor.assumeIsolated { self?.hide(); self?.lock() }
+        }
+        pending = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + Self.delay, execute: work)
     }
 
     private func hide() {
+        pending?.cancel()
+        pending = nil
         panels.forEach { $0.orderOut(nil) }
         panels = []
-        killSwitch.cardHidden()
+    }
+
+    /// `SACLockScreenImmediate` is a private login.framework call (the same one the Lock Screen menu item uses); if it is
+    /// ever missing the Mac simply does not lock.
+    private func lock() {
+        guard let handle = dlopen("/System/Library/PrivateFrameworks/login.framework/Versions/Current/login", RTLD_NOW),
+              let symbol = dlsym(handle, "SACLockScreenImmediate") else { return }
+        unsafeBitCast(symbol, to: (@convention(c) () -> Void).self)()
     }
 
     private func makePanel(for screen: NSScreen) -> NSPanel {
-        let size = NSSize(width: 320, height: 96)
-        let top = screen.frame.maxY - screen.safeAreaInsets.top
-        let panel = NSPanel(contentRect: NSRect(x: screen.frame.midX - size.width / 2, y: top - size.height - 12, width: size.width, height: size.height),
-                            styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
-        panel.isOpaque = false
-        panel.backgroundColor = .clear
-        panel.hasShadow = false
-        panel.level = NSWindow.Level(rawValue: Int(CGShieldingWindowLevel()))
+        let panel = NSPanel(contentRect: screen.frame, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
+        panel.backgroundColor = .black
+        panel.level = .screenSaver
         panel.collectionBehavior = [.canJoinAllSpaces, .stationary, .fullScreenAuxiliary]
         panel.ignoresMouseEvents = true
         panel.contentView = NSHostingView(rootView: LockCard(module: nowPlaying))
@@ -60,17 +68,15 @@ private struct LockCard: View {
     let module: NowPlayingModule
 
     var body: some View {
-        HStack(spacing: 14) {
-            ArtworkView(image: module.artwork, size: 64, radius: 12)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(module.info?.title ?? "Nothing playing").font(.headline).lineLimit(1)
-                Text(module.info?.artist ?? module.info?.album ?? "").font(.subheadline).foregroundStyle(.white.opacity(0.7)).lineLimit(1)
+        VStack(spacing: 20) {
+            ArtworkView(image: module.artwork, size: 240, radius: 24)
+            VStack(spacing: 4) {
+                Text(module.info?.title ?? "").font(.title.bold()).lineLimit(1)
+                Text(module.info?.artist ?? module.info?.album ?? "").font(.title3).foregroundStyle(.white.opacity(0.7)).lineLimit(1)
             }
-            Spacer(minLength: 0)
         }
         .foregroundStyle(.white)
-        .padding(16)
-        .frame(width: 320, height: 96)
-        .glassEffect(in: .rect(cornerRadius: 28))
+        .padding(60)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
