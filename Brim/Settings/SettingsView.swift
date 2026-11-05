@@ -30,6 +30,7 @@ struct DefaultsToggle: View {
 
 private struct GeneralTab: View {
     @AppStorage("hoverDelay") private var hoverDelay = 0.12
+    @AppStorage("lyricsFont") private var lyricsFont = LyricsFont.standard.rawValue
     @State private var launchAtLogin = SMAppService.mainApp.status == .enabled
     @State private var loginError: String?
 
@@ -46,6 +47,9 @@ private struct GeneralTab: View {
                     }
                 }
             if let loginError { Text(loginError).font(.caption).foregroundStyle(.red) }
+            Picker("Full-screen lyrics font", selection: $lyricsFont) {
+                ForEach(LyricsFont.allCases) { Text($0.title).tag($0.rawValue) }
+            }
             LabeledContent("Hover delay") {
                 HStack {
                     Slider(value: $hoverDelay, in: 0...0.6)

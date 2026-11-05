@@ -1,5 +1,30 @@
 import SwiftUI
 
+/// The typeface for the full-screen lyrics, chosen in Settings > General (`lyricsFont`).
+enum LyricsFont: String, CaseIterable, Identifiable {
+    case standard, rounded, bubbly, chalkboard
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .standard: "Default"
+        case .rounded: "Rounded"
+        case .bubbly: "Bubbly"
+        case .chalkboard: "Chalkboard"
+        }
+    }
+
+    func font(size: CGFloat) -> Font {
+        switch self {
+        case .standard: .system(size: size, weight: .bold)
+        case .rounded: .system(size: size, weight: .heavy, design: .rounded)
+        case .bubbly: .custom("ArialRoundedMTBold", size: size)
+        case .chalkboard: .custom("ChalkboardSE-Bold", size: size)
+        }
+    }
+}
+
 struct LyricsView: View {
     static let width: CGFloat = 250
 
@@ -8,6 +33,7 @@ struct LyricsView: View {
     var fontSize: CGFloat = 21
     /// Lines dim the further they are from the current one, and ease in and out as the current line moves.
     var fadeByDistance = false
+    var style = LyricsFont.standard
 
     var body: some View {
         let lines = module.lines
@@ -53,10 +79,10 @@ struct LyricsView: View {
 
     private func line(_ line: LyricLine, isCurrent: Bool, distance: Int) -> some View {
         Text(line.text.isEmpty ? "♪" : line.text)
-            .font(.system(size: fontSize, weight: .bold)) // Apple Music style: one big bold size, so lines never rewrap when highlighted
-            .foregroundStyle(isCurrent ? AnyShapeStyle(gradient) : AnyShapeStyle(.white.opacity(fadeByDistance ? max(0.12, 0.5 - 0.1 * Double(distance)) : 0.35)))
-            .animation(.easeInOut(duration: 0.45), value: isCurrent)
-            .animation(.easeInOut(duration: 0.45), value: distance)
+            .font(style.font(size: fontSize)) // one size for every line, so lines never rewrap when highlighted
+            .foregroundStyle(isCurrent ? AnyShapeStyle(gradient) : AnyShapeStyle(.white.opacity(fadeByDistance ? max(0, 0.7 - 0.2 * Double(distance)) : 0.35)))
+            .animation(.easeInOut(duration: 0.7), value: isCurrent)
+            .animation(.easeInOut(duration: 0.7), value: distance)
             .frame(maxWidth: .infinity, alignment: .leading)
             .contentShape(Rectangle())
     }

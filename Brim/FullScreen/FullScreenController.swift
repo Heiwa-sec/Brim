@@ -111,6 +111,7 @@ private struct FullScreenView: View {
     let state: FullScreenState
     let close: () -> Void
     @State private var drift = false
+    @AppStorage("lyricsFont") private var fontKey = LyricsFont.standard.rawValue
 
     var body: some View {
         ZStack {
@@ -129,7 +130,7 @@ private struct FullScreenView: View {
                         .opacity(state.controlsVisible ? 1 : 0)
                         .allowsHitTesting(state.controlsVisible)
                 }
-                if !lyrics.lines.isEmpty { LyricsView(module: lyrics, width: 780, fontSize: 56, fadeByDistance: true).frame(maxHeight: 900) }
+                if !lyrics.lines.isEmpty { LyricsView(module: lyrics, width: 780, fontSize: 56, fadeByDistance: true, style: LyricsFont(rawValue: fontKey) ?? .standard).frame(maxHeight: 900) }
             }
             .foregroundStyle(.white)
             .padding(60)
