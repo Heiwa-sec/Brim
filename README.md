@@ -20,7 +20,7 @@ Target: macOS 26+, Apple Silicon, Swift 6, SwiftUI plus AppKit, agent app (`LSUI
 | b Now Playing | Done, committed, **verified live by the maintainer (2026-11-04)** | Real playback works; buttons respond on the first click |
 | c Lyrics | Done, committed, **verified live by the maintainer (2026-11-05)** | Apple Music text style: 21 pt bold, current line gradient, others white 35% |
 | d File tray | Done, committed, **verified live by the maintainer (2026-11-05)** | Drop, drag out, Clear, three columns all work |
-| e System (plan: the phase plan (kept outside the repo)) | e1 Charging, e2 Bluetooth, e3 Weather, e4 HUD all built, merged and committed; **none tested live by the maintainer yet** | Weather and HUD are off by default |
+| e System (plan: the phase plan (kept outside the repo)) | e1 Charging, e2 Bluetooth (removed 2026-11-05 at the maintainer's request), e3 Weather, e4 HUD all built, merged and committed; **none tested live by the maintainer yet** | Weather and HUD are off by default |
 | f Settings and polish | Built and committed (settings window, 4 tabs); awaiting the maintainer's test. Per-display and hover options exist; polish items not done | Plan: the phase plan (kept outside the repo) |
 | g Notification mirroring | Built, committed and **checked here** (real notifications mirrored with Full Disk Access); off by default; awaiting the maintainer's test | Plan: the phase plan (kept outside the repo) |
 | h Lock-screen integration | **Dropped** (2026-11-05). Nothing from a normal app can show on the macOS 27 lock screen; the wallpaper trick was judged too risky for the Aerial wallpaper. Replaced by an opt-in full-screen Now Playing view on ⌥⌘L | Built, committed, checked here |
@@ -35,7 +35,6 @@ Turn on "Notification mirroring" in Settings > Modules and add the app (or Termi
 
 **Test checklists (phase e)**
 - *e1 Charging:* plug/unplug the charger: bolt (or battery) plus percent flash in the ears for 4 s. Hover on AC: Battery column. On battery: no column.
-- *e2 Bluetooth:* allow the Bluetooth prompt. Connect AirPods: headphones glyph plus lowest earbud % flash for 4 s; hover lists connected devices with `L/R/Case` %. Disconnect: column goes. Off switch: `defaults write dev.brim.Brim module.bluetooth.enabled -bool false`. Checked here with AirPods Pro: shows `L 100% · R 100% · Case 94%`.
 - *e3 Weather (off by default):* `defaults write dev.brim.Brim module.weather.enabled -bool true`, relaunch, allow Location, hover: symbol, temperature, description. Cache 30 min; refetch only on wake or location change. If the Location prompt never appears for an agent app, report it. Network: api.open-meteo.com only.
 - *e4 HUD (off by default):* `defaults write dev.brim.Brim module.hud.enabled -bool true`, add Brim in Accessibility, then volume, mute and brightness keys: system HUD suppressed, our symbol plus bar in the ears for 1.5 s, 1/16 per press. Without Accessibility the island says so and keys behave normally. This is the spike: if brightness keys never reach the tap, say so and we add the listener fallback. Keyboard backlight keys are not handled.
 
@@ -62,6 +61,7 @@ Phase (d) as built: `Brim/Modules/FileTray/` holds `FileTrayModule` (file URLs i
 None open except the ⌥⌘L lock test in "Next step".
 
 ### Session log
+- **2026-11-05 (Bluetooth removed):** the maintainer asked to get rid of the Bluetooth tab in the notch. The whole module, its tests, the permission row and the Info.plist usage string are deleted (git history has them); 33 tests pass.
 - **2026-11-05 (lock dropped):** the ⌥⌘L show-then-lock panel vanished at lock, so lock-screen work was dropped. ⌥⌘L is now a full-screen Now Playing view with animated artwork background, cover and big lyrics. `Brim/LockScreen/` became `Brim/FullScreen/`; no private API remains. 37 tests pass.
 - **2026-11-05 (lock fallback):** the maintainer reported the lock-screen card did not appear. Replaced the overlay with the ⌥⌘L pre-lock panel; deleted `LockSpike/`, `KillSwitch` (and its tests) and the Settings toggle; 37 tests pass. Panel and cancel verified by synthesizing the hot key; the real lock is owed by the maintainer.
 - **2026-11-05 (phase h scaffolding):** kill switch, lock controller and Settings toggle built; rendering verified by posting the lock notification while unlocked; 41 tests pass. The real lock-screen test is owed by the maintainer.
@@ -128,7 +128,6 @@ defaults write dev.brim.Brim display.<uuid>.hideUntilTop -bool true
 |---|---|---|
 | Accessibility | HUD replacement key tap | HUD module on |
 | Full Disk Access | Read the notification database | Notification mirroring opted in |
-| Bluetooth | Device and AirPods battery | Bluetooth module on |
 | Location (reduced accuracy) | Weather | Weather opted in |
 | Network: lrclib.net, api.open-meteo.com | Lyrics, weather | Their toggles on |
 

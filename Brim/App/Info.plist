@@ -22,8 +22,6 @@
 	<true/>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Brim uses your approximate location (about 10 km) to show the local weather.</string>
-	<key>NSBluetoothAlwaysUsageDescription</key>
-	<string>Brim shows connected Bluetooth devices and their battery levels in the island.</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 </dict>

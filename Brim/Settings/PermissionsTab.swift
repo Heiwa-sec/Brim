@@ -1,5 +1,4 @@
 import ApplicationServices
-import CoreBluetooth
 import CoreLocation
 import SwiftUI
 
@@ -8,13 +7,11 @@ import SwiftUI
 struct PermissionsTab: View {
     @State private var accessibility = false
     @State private var fullDisk = false
-    @State private var bluetooth = CBManager.authorization
     @State private var location = CLLocationManager().authorizationStatus
 
     var body: some View {
         Form {
             row("Accessibility", "Volume and brightness HUD", granted: accessibility, pane: "Privacy_Accessibility")
-            row("Bluetooth", "Device and AirPods battery", granted: bluetooth == .allowedAlways, pane: "Privacy_Bluetooth")
             row("Location", "Weather (approximate only)", granted: location == .authorized || location == .authorizedAlways, pane: "Privacy_LocationServices")
             row("Full Disk Access", "Notification mirroring", granted: fullDisk, pane: "Privacy_AllFiles")
             Text("Notification mirroring reads only the title, text and app of new notifications from macOS's notification database, read-only, and keeps them in memory while the banner shows. Nothing is logged, saved or sent.").font(.caption).foregroundStyle(.secondary)
@@ -43,7 +40,6 @@ struct PermissionsTab: View {
         let fd = open(NotificationsModule.directory + "/db", O_RDONLY)
         fullDisk = fd >= 0
         if fd >= 0 { close(fd) }
-        bluetooth = CBManager.authorization
         location = CLLocationManager().authorizationStatus
     }
 }
