@@ -20,6 +20,8 @@
 	<string>1</string>
 	<key>LSUIElement</key>
 	<true/>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>Brim shows connected Bluetooth devices and their battery levels in the island.</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 </dict>
