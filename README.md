@@ -18,7 +18,7 @@ Target: macOS 26+, Apple Silicon, Swift 6, SwiftUI plus AppKit, agent app (`LSUI
 | 0 Lock-screen spike | Done, committed | See "Lock-screen findings" |
 | a Panel, geometry, states | Done, committed | Expands from the notch (fixed: window pre-grows before the spring starts) |
 | b Now Playing | Done, committed, **verified live by the maintainer (2026-11-04)** | Real playback works; buttons respond on the first click |
-| c Lyrics | Built, 20 unit tests pass, committed. **Not yet verified live by the maintainer** (needs real music) | See "Next step" |
+| c Lyrics | Done, committed, **verified live by the maintainer (2026-11-05)** | Apple Music text style: 21 pt bold, current line gradient, others white 35% |
 | d File tray | | |
 | e Charging, Bluetooth/AirPods, weather, HUD | | |
 | f Settings and polish | | |
@@ -26,13 +26,14 @@ Target: macOS 26+, Apple Silicon, Swift 6, SwiftUI plus AppKit, agent app (`LSUI
 | h Lock-screen integration | | |
 
 ### Next step
-the maintainer live-tests phase (c), then start phase (d), the file tray. Live test: play a well-known song in Music or Spotify, hover the notch. The island should widen and a lyrics column should appear on the right, following the song, with the current line in the artwork's colours. Also check: tap a line to seek; pause freezes the highlight; skipping a track refetches; an unknown track leaves the island narrow; replaying a song makes no network request (a file appears in `~/Library/Caches/Brim/lyrics/`); `defaults write dev.brim.Brim module.lyrics.enabled -bool false` removes the column.
+Start phase (d), the file tray (plan first). Phase (c) live checklist, for reference: play a well-known song in Music or Spotify, hover the notch. The island should widen and a lyrics column should appear on the right, following the song, with the current line in the artwork's colours. Also check: tap a line to seek; pause freezes the highlight; skipping a track refetches; an unknown track leaves the island narrow; replaying a song makes no network request (a file appears in `~/Library/Caches/Brim/lyrics/`); `defaults write dev.brim.Brim module.lyrics.enabled -bool false` removes the column.
 
 Phase (c) as built: `Brim/Modules/Lyrics/` holds `LRC` (parser, tested), `LRCLibClient` (title and artist only; caches hits and 404s on disk; 404s never expire, so delete the cache folder to retry), `ArtworkPalette` (8x8 downsample, tested), `LyricsModule` (own module id `lyrics`, refetches when title or artist changes) and `LyricsView`. Timing has no timer: the view's `TimelineView` has one scheduled date per upcoming line, only while the island is expanded and playing. Not done on purpose: unsynced lyrics fallback, title cleaning ("Remastered"), no retry after a network failure until the track changes, settings UI (phase f).
 
 ### Decisions and gotchas worth knowing (so a new session need not rediscover them)
 - **Plans:** the overall plan is the phase plan (kept outside the repo); the phase (c) plan is the phase plan (kept outside the repo). Each new phase gets its own short plan, approved before coding.
 - **Lyrics layout (the maintainer chose):** the island widens with a lyrics column on the right (not a taller strip), and the artwork colour gradient fills only the current line's text; the island itself stays black.
+- **"No lyrics" is silent by design.** Instrumental tracks (`instrumental: true`, `syncedLyrics: null`) and unknown tracks leave the island narrow. Check `~/Library/Caches/Brim/lyrics/` to see what LRCLIB answered.
 - **LRCLIB** was probed live: `GET /api/get?track_name=&artist_name=` returns 200 with `syncedLyrics`, or 404 when there is no match. Duration and album are not sent.
 - **Adding a source file:** run `xcodegen generate` first. Pure files that tests need must also be listed under `BrimTests` sources in `project.yml`. `Brim.xcodeproj` is generated and not committed.
 - **SourceKit** in the editor reports "Cannot find type ..." across files until the project is regenerated. Trust `xcodebuild`, not those diagnostics.

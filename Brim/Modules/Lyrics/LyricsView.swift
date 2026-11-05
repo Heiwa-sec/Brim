@@ -28,7 +28,7 @@ struct LyricsView: View {
     private func column(lines: [LyricLine], current: Int?) -> some View {
         ScrollViewReader { proxy in
             ScrollView(.vertical, showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 10) {
+                VStack(alignment: .leading, spacing: 14) {
                     ForEach(lines.indices, id: \.self) { index in
                         line(lines[index], isCurrent: index == current)
                             .id(index)
@@ -49,8 +49,8 @@ struct LyricsView: View {
 
     private func line(_ line: LyricLine, isCurrent: Bool) -> some View {
         Text(line.text.isEmpty ? "♪" : line.text)
-            .font(.system(size: 15, weight: isCurrent ? .semibold : .regular)) // same size for both, so lines never rewrap
-            .foregroundStyle(isCurrent ? AnyShapeStyle(gradient) : AnyShapeStyle(.white.opacity(0.45)))
+            .font(.system(size: 21, weight: .bold)) // Apple Music style: one big bold size, so lines never rewrap when highlighted
+            .foregroundStyle(isCurrent ? AnyShapeStyle(gradient) : AnyShapeStyle(.white.opacity(0.35)))
             .frame(maxWidth: .infinity, alignment: .leading)
             .contentShape(Rectangle())
     }
