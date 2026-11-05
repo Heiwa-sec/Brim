@@ -28,7 +28,7 @@ final class IslandController {
         trackActivity()
 
         // Global monitors see pointer events over other apps, local ones over our own panel. Neither needs a permission for mouse events.
-        let mask: NSEvent.EventTypeMask = [.mouseMoved, .leftMouseDown]
+        let mask: NSEvent.EventTypeMask = [.mouseMoved, .leftMouseDragged, .leftMouseDown]
         let handler: @Sendable (Bool) -> Void = { [weak self] isClick in
             MainActor.assumeIsolated { self?.handle(isClick: isClick) }
         }

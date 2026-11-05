@@ -3,6 +3,7 @@ import SwiftUI
 struct IslandView: View {
     let model: IslandModel
     let host: ModuleHost
+    @State private var dropTargeted = false
 
     private let morph = Animation.spring(response: 0.42, dampingFraction: 0.78)
 
@@ -12,6 +13,7 @@ struct IslandView: View {
             .overlay { content }
             .clipShape(IslandShape(topRadius: model.topRadius, bottomRadius: model.bottomRadius))
             .frame(width: model.size.width, height: model.size.height)
+            .dropDestination(for: URL.self) { urls, _ in host.drop(urls) } isTargeted: { dropTargeted = $0 }
             // The spring stops here: the panel itself resizes instantly, and animating the alignment frame
             // below would make the shape drift in from the middle of the panel instead of the notch.
             .animation(morph, value: model.size) // size, not state, so adding the lyrics column springs too
@@ -45,7 +47,13 @@ struct IslandView: View {
     private var expandedBody: some View {
         Group {
             let views = host.expandedViews
-            if !views.isEmpty {
+            if dropTargeted {
+                Text("Drop to add to tray")
+                    .font(.callout)
+                    .foregroundStyle(.white.opacity(0.7))
+                    .padding(.horizontal, 16).padding(.vertical, 8)
+                    .glassEffect(in: .capsule)
+            } else if !views.isEmpty {
                 HStack(spacing: IslandModel.columnGap) { ForEach(views.indices, id: \.self) { views[$0] } }
             } else {
                 Text(host.emptyMessage)

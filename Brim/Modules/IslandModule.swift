@@ -17,6 +17,8 @@ protocol IslandModule: AnyObject, Observable {
     var expanded: AnyView? { get }
     /// A user-visible reason the module can't work, shown when there is no content.
     var problem: String? { get }
+    /// Offered files dropped on the island. Return true to take them.
+    func receive(_ urls: [URL]) -> Bool
 }
 
 extension IslandModule {
@@ -25,6 +27,7 @@ extension IslandModule {
     var compactTrailing: AnyView? { nil }
     var expanded: AnyView? { nil }
     var problem: String? { nil }
+    func receive(_ urls: [URL]) -> Bool { false }
 }
 
 /// Starts and stops modules from their `module.<id>.enabled` switches (default on) and tells the islands what to show.
@@ -57,5 +60,6 @@ final class ModuleHost {
     var compactLeading: [AnyView] { active.filter(\.hasActivity).compactMap(\.compactLeading) }
     var compactTrailing: [AnyView] { active.filter(\.hasActivity).compactMap(\.compactTrailing) }
     var expandedViews: [AnyView] { active.compactMap(\.expanded) }
+    func drop(_ urls: [URL]) -> Bool { active.contains { $0.receive(urls) } }
     var emptyMessage: String { active.compactMap(\.problem).first ?? "Nothing playing" }
 }
