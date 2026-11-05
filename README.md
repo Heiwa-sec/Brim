@@ -22,11 +22,14 @@ Target: macOS 26+, Apple Silicon, Swift 6, SwiftUI plus AppKit, agent app (`LSUI
 | d File tray | Done, committed, **verified live by the maintainer (2026-11-05)** | Drop, drag out, Clear, three columns all work |
 | e System (plan: the phase plan (kept outside the repo)) | e1 Charging, e2 Bluetooth, e3 Weather, e4 HUD all built, merged and committed; **none tested live by the maintainer yet** | Weather and HUD are off by default |
 | f Settings and polish | Built and committed (settings window, 4 tabs); awaiting the maintainer's test. Per-display and hover options exist; polish items not done | Plan: the phase plan (kept outside the repo) |
-| g Notification mirroring | | |
+| g Notification mirroring | Built, committed and **checked here** (real notifications mirrored with Full Disk Access); off by default; awaiting the maintainer's test | Plan: the phase plan (kept outside the repo) |
 | h Lock-screen integration | | |
 
 ### Next step
-the maintainer tests phase (e) live, one module at a time (checklists below). Then phase (f), Settings and polish: the toggles replace the `defaults write` switches used now. Still open: the longer lock-screen re-test before phase (h).
+the maintainer tests phases e, f and g live (checklists below). Then phase (h), lock-screen integration, which needs the longer lock-screen re-test first (see "Lock-screen findings"). Phase (f) polish items not done: none known.
+
+**Test checklist (phase g, notification mirroring; off by default)**
+Turn on "Notification mirroring" in Settings > Modules and add the app (or Terminal while running from it) to Full Disk Access; Settings > Permissions shows its state. Send yourself a Messages or Mail notification, or run `osascript -e 'display notification "hi" with title "t"'`: the island opens by itself for 5 s with an icon card. macOS writes the database a few seconds after it shows its own banner, so Brim's banner lags by about 5 s; this is the database, not Brim. Without Full Disk Access the island says so. Nothing is logged or stored.
 
 **Test checklists (phase e)**
 - *e1 Charging:* plug/unplug the charger: bolt (or battery) plus percent flash in the ears for 4 s. Hover on AC: Battery column. On battery: no column.
@@ -57,6 +60,7 @@ Phase (d) as built: `Brim/Modules/FileTray/` holds `FileTrayModule` (file URLs i
 - **Lock test was too short.** The spike log showed LOCKED then UNLOCKED two seconds apart. Re-test with a longer lock (see below) before phase (h). Not blocking phases (c) to (g).
 
 ### Session log
+- **2026-11-05 (phase g):** Notification mirroring built after the maintainer granted Full Disk Access. Schema checked on macOS 27 (db version 19): `record.data` is a bplist with `app`, `req.titl/subt/body`. Vnode source on `db-wal`; `IslandModule.wantsExpanded` plus `IslandModel.banner` open the island by themselves. Live test with `osascript display notification` worked; idle with the module on 0.0x% CPU.
 - **2026-11-05 (Bluetooth fixes):** IOBluetooth's private battery properties read 0 on macOS 27, so batteries now come from `system_profiler SPBluetoothDataType -json` (about 70 ms, run on connect, at start and once 3 s after a connect), matched by device name because its addresses differ from IOBluetooth's. Removed the private-API code. Gear button moved to the menu-bar row.
 - **2026-11-05 (phase f):** Settings window (`Brim/Settings/`): General (launch at login via SMAppService, hover delay), Modules (toggle per module), Displays (per screen), Permissions (status plus Open buttons). Opens from the island gear, ⌥⌘, (Carbon hot key, no permission) or relaunching Brim. Live launch found a real crash in e2: IOBluetooth calls the connect notification on a background thread and the `@MainActor` listener trapped; fixed by hopping to the main actor.
 - **2026-11-05 (phase e run):** phase (e) sub-phases e1 to e4 built and merged; 34 tests pass; idle 0.00% CPU, 15 MB, 0 leaks. Awaiting the maintainer's live tests.

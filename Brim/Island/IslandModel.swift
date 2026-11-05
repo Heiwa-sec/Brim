@@ -17,6 +17,8 @@ final class IslandModel {
     var hideUntilTop = false
     var hovering = false { didSet { notify(oldValue != hovering) } }
     var pinned = false { didSet { notify(oldValue != pinned) } }
+    /// A module's banner holds the island open without the pointer.
+    var banner = false { didSet { notify(oldValue != banner) } }
     var activityCount = 0 { didSet { notify(oldValue != activityCount) } }
     /// Modules with content in the expanded island; each one beyond the first widens it.
     var expandedColumns = 1 { didSet { notify(oldValue != expandedColumns) } }
@@ -27,7 +29,7 @@ final class IslandModel {
     init(geometry: NotchGeometry) { self.geometry = geometry }
 
     var state: IslandState {
-        if hovering || pinned { return .expanded }
+        if hovering || pinned || banner { return .expanded }
         return activityCount > 0 ? .compact : .collapsed
     }
 

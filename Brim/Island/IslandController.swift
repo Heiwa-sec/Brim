@@ -41,6 +41,7 @@ final class IslandController {
         withObservationTracking {
             model.activityCount = host.activityCount
             model.expandedColumns = max(1, host.expandedViews.count)
+            if host.wantsExpanded { if !model.banner { grow { [model] in model.banner = true } } } else { model.banner = false }
         } onChange: { [weak self] in
             Task { @MainActor in self?.trackActivity() }
         }

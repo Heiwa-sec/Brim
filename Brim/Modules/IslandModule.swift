@@ -17,6 +17,8 @@ protocol IslandModule: AnyObject, Observable {
     var hasActivity: Bool { get }
     var compactLeading: AnyView? { get }
     var compactTrailing: AnyView? { get }
+    /// True while the module wants the island open by itself (a banner), regardless of the pointer.
+    var wantsExpanded: Bool { get }
     /// Content for the expanded island; nil when there is nothing to show.
     var expanded: AnyView? { get }
     /// A user-visible reason the module can't work, shown when there is no content.
@@ -32,6 +34,7 @@ extension IslandModule {
     var compactTrailing: AnyView? { nil }
     var expanded: AnyView? { nil }
     var problem: String? { nil }
+    var wantsExpanded: Bool { false }
     func receive(_ urls: [URL]) -> Bool { false }
 }
 
@@ -61,6 +64,7 @@ final class ModuleHost {
 
     private var active: [any IslandModule] { modules.filter { running.contains(type(of: $0).id) } }
 
+    var wantsExpanded: Bool { active.contains(where: \.wantsExpanded) }
     var activityCount: Int { active.filter(\.hasActivity).count }
     var compactLeading: [AnyView] { active.filter(\.hasActivity).compactMap(\.compactLeading) }
     var compactTrailing: [AnyView] { active.filter(\.hasActivity).compactMap(\.compactTrailing) }

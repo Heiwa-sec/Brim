@@ -6,7 +6,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         let nowPlaying = NowPlayingModule()
-        let host = ModuleHost(modules: [nowPlaying, LyricsModule(nowPlaying: nowPlaying), FileTrayModule(), ChargingModule(), BluetoothModule(), WeatherModule(), HUDModule()])
+        let host = ModuleHost(modules: [nowPlaying, LyricsModule(nowPlaying: nowPlaying), FileTrayModule(), ChargingModule(), BluetoothModule(), WeatherModule(), HUDModule(), NotificationsModule()])
         self.host = host
         displays = DisplayManager(host: host)
         SettingsWindow.shared.modules = host.modules.map { type(of: $0) }

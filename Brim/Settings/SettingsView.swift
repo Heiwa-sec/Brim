@@ -11,7 +11,7 @@ struct SettingsView: View {
             DisplaysTab().tabItem { Label("Displays", systemImage: "display") }
             PermissionsTab().tabItem { Label("Permissions", systemImage: "lock.shield") }
         }
-        .frame(width: 420, height: 320)
+        .frame(width: 420, height: 400)
     }
 }
 
