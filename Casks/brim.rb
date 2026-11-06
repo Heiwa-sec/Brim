@@ -8,7 +8,7 @@ cask "brim" do
   homepage "https://github.com/Heiwa-sec/Brim"
 
   depends_on arch: :arm64
-  depends_on macos: ">= :tahoe"
+  depends_on macos: :tahoe
 
   app "Brim.app"
 
