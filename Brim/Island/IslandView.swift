@@ -56,6 +56,11 @@ struct IslandView: View {
         .transition(.opacity)
     }
 
+    /// Kept open and idle: only the lyrics show, with no controls. Falls back to the normal view when there are none.
+    private var lyricsMode: Bool {
+        model.lyricsOnly && host.resolve(model.tab) == .nowPlaying && host.lyrics?.lines.isEmpty == false
+    }
+
     private var expandedBody: some View {
         Group {
             let tab = host.resolve(model.tab)
@@ -66,6 +71,9 @@ struct IslandView: View {
                     .foregroundStyle(.white.opacity(0.7))
                     .padding(.horizontal, 16).padding(.vertical, 8)
                     .glassEffect(in: .capsule)
+            } else if lyricsMode, let lyrics = host.lyrics {
+                LyricsView(module: lyrics, width: model.size.width - 56, fontSize: 22, fadeByDistance: true, centered: true)
+                    .transition(.opacity)
             } else if !views.isEmpty {
                 HStack(spacing: IslandModel.columnGap) { ForEach(views.indices, id: \.self) { views[$0] } }
                     .id(tab)
@@ -80,6 +88,7 @@ struct IslandView: View {
         .padding(.top, model.geometry.size.height + 4) // stay clear of the notch
         .padding(.horizontal, 28).padding(.bottom, host.tabs.count > 1 ? 24 : 16)
         .animation(.easeInOut(duration: 0.2), value: host.resolve(model.tab))
+        .animation(.easeInOut(duration: 0.25), value: lyricsMode)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .overlay(alignment: .topTrailing) {
             HStack(spacing: 12) { // beside the notch, in the menu-bar row
@@ -90,10 +99,11 @@ struct IslandView: View {
                 Button { SettingsWindow.shared.show() } label: { Image(systemName: "gearshape.fill").font(.system(size: 12)) }
             }
             .buttonStyle(.plain)
-            .foregroundStyle(.white.opacity(0.5))
+            .foregroundStyle(.white.opacity(0.35))
             .padding(.top, 8).padding(.trailing, 18)
+            .opacity(lyricsMode ? 0 : 1).allowsHitTesting(!lyricsMode)
         }
-        .overlay(alignment: .bottom) { tabDots }
+        .overlay(alignment: .bottom) { tabDots.opacity(lyricsMode ? 0 : 1) }
         .transition(.opacity.animation(.easeOut(duration: 0.18).delay(0.14))) // appear after the shape has grown
     }
 
@@ -105,7 +115,7 @@ struct IslandView: View {
                 ForEach(tabs, id: \.self) { tab in
                     let current = tab == host.resolve(model.tab)
                     Button { model.tab = tab } label: {
-                        Capsule().fill(.white.opacity(current ? 0.9 : 0.3)).frame(width: current ? 16 : 6, height: 6)
+                        Capsule().fill(.white.opacity(current ? 0.6 : 0.22)).frame(width: current ? 16 : 6, height: 6)
                             .padding(.vertical, 4)
                     }
                     .buttonStyle(.plain)

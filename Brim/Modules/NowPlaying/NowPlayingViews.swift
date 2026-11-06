@@ -61,6 +61,13 @@ struct NowPlayingExpandedView: View {
     }
 }
 
+extension View {
+    /// Island controls (scale 1) get a faint see-through fill; the larger full-screen ones keep the glass.
+    @ViewBuilder func controlBackground<S: Shape>(_ shape: S, subtle: Bool) -> some View {
+        if subtle { background(.white.opacity(0.07), in: shape) } else { glassEffect(in: shape) }
+    }
+}
+
 struct TransportView: View {
     let module: NowPlayingModule
     var scale: CGFloat = 1
@@ -72,13 +79,14 @@ struct TransportView: View {
             button("forward.fill", .next, size: 15 * scale)
         }
         .padding(.horizontal, 22 * scale).padding(.vertical, 7 * scale)
-        .glassEffect(in: .capsule)
+        .controlBackground(.capsule, subtle: scale == 1)
         .frame(maxWidth: .infinity)
     }
 
     private func button(_ symbol: String, _ command: MediaCommand, size: CGFloat) -> some View {
         Button { module.send(command) } label: {
             Image(systemName: symbol).font(.system(size: size, weight: .semibold)).contentTransition(.symbolEffect(.replace))
+                .foregroundStyle(.white.opacity(scale == 1 ? 0.6 : 1))
         }
         .buttonStyle(.plain)
     }

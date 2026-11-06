@@ -36,6 +36,7 @@ struct LyricsView: View {
     /// Lines dim the further they are from the current one, and ease in and out as the current line moves.
     var fadeByDistance = false
     var style = LyricsFont.standard
+    var centered = false
 
     var body: some View {
         let lines = module.lines
@@ -97,7 +98,8 @@ struct LyricsView: View {
             .foregroundStyle(isCurrent ? AnyShapeStyle(gradient) : AnyShapeStyle(.white.opacity(fadeByDistance ? browsing ? 0.45 : max(0, 0.7 - 0.2 * Double(distance)) : 0.35)))
             .animation(.easeInOut(duration: 0.7), value: isCurrent)
             .animation(.easeInOut(duration: 0.7), value: distance)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .multilineTextAlignment(centered ? .center : .leading)
+            .frame(maxWidth: .infinity, alignment: centered ? .center : .leading)
             .contentShape(Rectangle())
     }
 

@@ -14,11 +14,11 @@ struct PlaylistButton: View {
             } label: {
                 Image(systemName: playlist.open ? "list.bullet.circle.fill" : "list.bullet")
                     .font(.system(size: 15 * scale, weight: .semibold))
-                    .foregroundStyle(.white.opacity(playlist.open ? 1 : 0.55))
+                    .foregroundStyle(.white.opacity(scale == 1 ? (playlist.open ? 0.6 : 0.35) : (playlist.open ? 1 : 0.55)))
                     .frame(width: 34 * scale, height: 34 * scale)
             }
             .buttonStyle(.plain)
-            .glassEffect(in: .circle)
+            .controlBackground(.circle, subtle: scale == 1)
             .accessibilityLabel(playlist.open ? "Hide playlist" : "Show playlist")
         }
     }

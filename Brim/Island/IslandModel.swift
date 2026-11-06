@@ -28,6 +28,9 @@ final class IslandModel {
     /// Modules with content in the expanded island; each one beyond the first widens it.
     var expandedColumns = 1 { didSet { notify(oldValue != expandedColumns) } }
 
+    /// Kept open with the pointer away: the island shows only the lyrics until the pointer comes back.
+    var lyricsOnly: Bool { keepOpen && !dismissed && !hovering && !pinned && !banner }
+
     /// Called when `state` may have changed, so the controller can resize the panel.
     @ObservationIgnored var onStateChange: (() -> Void)?
 

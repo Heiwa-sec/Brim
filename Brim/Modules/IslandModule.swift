@@ -100,6 +100,7 @@ final class ModuleHost {
     private var active: [any IslandModule] { modules.filter { running.contains(type(of: $0).id) } }
 
     var wantsExpanded: Bool { active.contains(where: \.wantsExpanded) }
+    var lyrics: LyricsModule? { active.lazy.compactMap { $0 as? LyricsModule }.first }
     var activityCount: Int { active.filter(\.hasActivity).count }
     var compactLeading: [AnyView] { active.filter(\.hasActivity).compactMap(\.compactLeading) }
     var compactTrailing: [AnyView] { active.filter(\.hasActivity).compactMap(\.compactTrailing) }
