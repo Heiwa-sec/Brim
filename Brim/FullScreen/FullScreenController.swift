@@ -126,12 +126,15 @@ private struct FullScreenView: View {
                     .frame(width: 420)
                     ScrubberView(module: nowPlaying).frame(width: 420)
                     TransportView(module: nowPlaying, scale: 1.5)
+                        .overlay(alignment: .leading) { PlaylistButton(module: nowPlaying, scale: 1.5) }
                         .overlay(alignment: .trailing) { LyricsButton(scale: 1.5) }
                         .frame(width: 420)
                         .opacity(state.controlsVisible ? 1 : 0)
                         .allowsHitTesting(state.controlsVisible)
                 }
-                if !lyrics.lines.isEmpty { LyricsView(module: lyrics, width: 780, fontSize: 56, fadeByDistance: true, style: LyricsFont(rawValue: fontKey) ?? .standard).frame(maxHeight: 900) }
+                if nowPlaying.showsPlaylist {
+                    PlaylistView(module: nowPlaying, fontSize: 30, rowPadding: 10).frame(width: 780, height: 700)
+                } else if !lyrics.lines.isEmpty { LyricsView(module: lyrics, width: 780, fontSize: 56, fadeByDistance: true, style: LyricsFont(rawValue: fontKey) ?? .standard).frame(maxHeight: 900) }
             }
             .foregroundStyle(.white)
             .padding(60)

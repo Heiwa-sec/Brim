@@ -9,6 +9,7 @@ A small macOS app that turns the notch into a Dynamic Island: what is playing, s
 - **Now Playing:** cover, title, artist, progress bar and transport buttons for whatever is playing (Music, Spotify, a browser).
 - **Lyrics:** synced lyrics next to the player, fetched from [LRCLIB](https://lrclib.net).
 - **Full-screen view:** click the cover, or press **⌥⌘L**. A big cover, big lyrics and a slow animated background. Esc closes it.
+- **Playlist swap (Apple Music):** tap the list button next to the transport buttons, in the island or the full-screen view, to see the playlist that is playing and click any song to jump to it. Other players (Spotify, browsers) do not expose their playlists, so the button only shows for Apple Music.
 - **File tray:** drag files to the notch to park them, drag them out later. Nothing is copied.
 - **Charging:** a short flash when you plug in or unplug.
 - **Off by default:** weather, volume and brightness HUD, and notification mirroring. Turn them on in Settings > Modules.
@@ -70,6 +71,7 @@ Brim asks for nothing when it starts. Each permission is requested only when you
 | Accessibility | Replacing the volume and brightness overlay | HUD is on |
 | Full Disk Access | Reading new notifications from macOS's notification database | Notification mirroring is on |
 | Location (approximate) | Local weather | Weather is on |
+| Automation (Music) | Listing and playing the songs of the current Apple Music playlist | You tap the playlist button |
 | Camera | Showing your own camera while a FaceTime call is active | Call camera is on |
 
 Brim is not sandboxed, because those features cannot work inside the sandbox. It does not use Screen Recording, Input Monitoring, Contacts, Photos or the microphone.

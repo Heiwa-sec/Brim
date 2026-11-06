@@ -14,6 +14,10 @@ final class NowPlayingModule: IslandModule {
     private(set) var info: NowPlayingInfo?
     private(set) var artwork: NSImage?
     private(set) var unavailable = false
+    let playlist = PlaylistModel()
+
+    /// The playlist list is showing: it is open and Apple Music is the player.
+    var showsPlaylist: Bool { playlist.open && info?.bundleID == PlaylistModel.musicBundleID }
 
     @ObservationIgnored private var adapter: MediaAdapter?
     @ObservationIgnored private var failures = 0

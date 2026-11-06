@@ -32,6 +32,7 @@ targets:
         CFBundleIconFile: AppIcon
         NSPrincipalClass: NSApplication
         NSCameraUsageDescription: Brim shows your own camera while a FaceTime call is active, only if you turn on Call camera.
+        NSAppleEventsUsageDescription: Brim lists and plays the songs of your Apple Music playlist when you tap the playlist button.
         NSLocationWhenInUseUsageDescription: Brim uses your approximate location (about 10 km) to show the local weather.
     settings:
       base:
@@ -60,7 +61,7 @@ targets:
   BrimTests:
     type: bundle.unit-test
     platform: macOS
-    sources: [BrimTests, Brim/Island/NotchGeometry.swift, Brim/Modules/NowPlaying/NowPlayingInfo.swift, Brim/Modules/Lyrics/LRC.swift, Brim/Modules/Todo/TodoList.swift, Brim/Modules/Lyrics/ArtworkPalette.swift, Brim/Modules/Charging/PowerInfo.swift, Brim/Modules/Weather/WeatherInfo.swift, Brim/Modules/HUD/HUDKey.swift, Brim/Modules/Notifications/NotificationRecord.swift]
+    sources: [BrimTests, Brim/Island/NotchGeometry.swift, Brim/Modules/NowPlaying/NowPlayingInfo.swift, Brim/Modules/Lyrics/LRC.swift, Brim/Modules/Todo/TodoList.swift, Brim/Modules/Lyrics/ArtworkPalette.swift, Brim/Modules/Charging/PowerInfo.swift, Brim/Modules/Weather/WeatherInfo.swift, Brim/Modules/HUD/HUDKey.swift, Brim/Modules/Notifications/NotificationRecord.swift, Brim/Modules/NowPlaying/PlaylistModel.swift]
     settings:
       base:
         GENERATE_INFOPLIST_FILE: YES

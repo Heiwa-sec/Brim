@@ -43,12 +43,18 @@ struct NowPlayingExpandedView: View {
             .buttonStyle(.plain)
             .accessibilityLabel("Show full screen")
             VStack(alignment: .leading, spacing: 8) {
-                VStack(alignment: .leading, spacing: 1) {
-                    Text(module.info?.title ?? "").font(.headline).lineLimit(1)
-                    Text(module.info?.artist ?? module.info?.album ?? "").font(.subheadline).foregroundStyle(.white.opacity(0.65)).lineLimit(1)
+                if module.showsPlaylist {
+                    PlaylistView(module: module).frame(height: 70)
+                } else {
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(module.info?.title ?? "").font(.headline).lineLimit(1)
+                        Text(module.info?.artist ?? module.info?.album ?? "").font(.subheadline).foregroundStyle(.white.opacity(0.65)).lineLimit(1)
+                    }
+                    ScrubberView(module: module)
                 }
-                ScrubberView(module: module)
-                TransportView(module: module).overlay(alignment: .trailing) { LyricsButton() }
+                TransportView(module: module)
+                    .overlay(alignment: .leading) { PlaylistButton(module: module) }
+                    .overlay(alignment: .trailing) { LyricsButton() }
             }
         }
         .foregroundStyle(.white)
