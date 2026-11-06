@@ -1,0 +1,4 @@
+#!/bin/sh
+# Quit a running Brim so the new copy can replace it. Settings live in the user's preferences and are kept.
+pkill -x Brim || true
+exit 0

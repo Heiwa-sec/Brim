@@ -27,8 +27,9 @@ targets:
       properties:
         LSUIElement: true
         CFBundleName: Brim
-        CFBundleShortVersionString: "1.1"
-        CFBundleVersion: "2"
+        CFBundleShortVersionString: "1.2"
+        CFBundleVersion: "3"
+        CFBundleIconFile: AppIcon
         NSPrincipalClass: NSApplication
         NSCameraUsageDescription: Brim shows your own camera while a FaceTime call is active, only if you turn on Call camera.
         NSLocationWhenInUseUsageDescription: Brim uses your approximate location (about 10 km) to show the local weather.

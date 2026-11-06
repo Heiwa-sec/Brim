@@ -1,0 +1,5 @@
+#!/bin/sh
+# Open Brim for the person who ran the installer.
+user=$(stat -f%Su /dev/console)
+sudo -u "$user" open /Applications/Brim.app || true
+exit 0

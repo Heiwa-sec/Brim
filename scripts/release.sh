@@ -1,6 +1,6 @@
 #!/bin/sh
-# Builds a Release app and writes build/release/Brim.zip and Brim.dmg, each with a SHA-256 checksum.
-# Publish all four files; users compare the checksum before opening the app.
+# Builds a Release app and writes build/release/Brim.pkg (double-click installer), Brim.dmg and Brim.zip, each with a SHA-256 checksum.
+# Publish all six files; users compare the checksum before opening the app.
 set -e
 cd "$(dirname "$0")/.."
 xcodegen generate >/dev/null
@@ -15,4 +15,6 @@ trap 'rm -rf "$stage"' EXIT
 ditto "$app" "$stage/Brim.app"
 ln -s /Applications "$stage/Applications"
 hdiutil create -volname Brim -srcfolder "$stage" -ov -format UDZO "$out/Brim.dmg" >/dev/null
-(cd "$out" && shasum -a 256 Brim.zip | tee Brim.zip.sha256 && shasum -a 256 Brim.dmg | tee Brim.dmg.sha256)
+# The installer puts Brim in /Applications itself, quits a running copy first and opens the new one. Settings are untouched.
+pkgbuild --component "$app" --install-location /Applications --scripts scripts/installer "$out/Brim.pkg" >/dev/null
+(cd "$out" && for f in Brim.pkg Brim.dmg Brim.zip; do shasum -a 256 "$f" | tee "$f.sha256"; done)

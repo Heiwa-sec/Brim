@@ -21,20 +21,14 @@ macOS 26 or later on an Apple Silicon Mac. Built and tested on a MacBook Air wit
 
 ## Install
 
-Brim is **not notarized** (that needs a paid Apple Developer account; this project uses a free one), so macOS shows one warning the first time you open it: "Apple could not verify Brim is free of malware". It is expected, and it appears whichever way you install.
+Brim is **not notarized** (that needs a paid Apple Developer account; this project uses a free one), so macOS shows one warning the first time you open the installer: it "cannot verify" Brim is free of malware. This is expected.
 
-**Homebrew**
-```
-brew install --cask Heiwa-sec/brim/brim
-```
+1. Download `Brim.pkg` and `Brim.pkg.sha256` from the [latest release](../../releases/latest).
+2. Optional: in Terminal, in the download folder, run `shasum -a 256 -c Brim.pkg.sha256`. It must print `Brim.pkg: OK`.
+3. Double-click `Brim.pkg`. If macOS blocks it, open **System Settings > Privacy & Security**, scroll down and click **Open Anyway** next to Brim.pkg (or right-click the file and choose Open).
+4. Follow the installer. It puts Brim in Applications and opens it. To update, run the new installer: it quits the old copy first and keeps your settings.
 
-**DMG**
-
-1. Download `Brim.dmg` and `Brim.dmg.sha256` from the [latest release](../../releases/latest).
-2. In Terminal, in the download folder, run `shasum -a 256 -c Brim.dmg.sha256`. It must print `Brim.dmg: OK`; if not, delete the file.
-3. Open the DMG and drag Brim onto Applications.
-
-**First launch (both routes):** open Brim, click Done on the warning, then go to **System Settings > Privacy & Security**, scroll down to the message about Brim and click **Open Anyway**. You only do this once. `Brim.zip` is also attached to each release, with its own checksum.
+A drag-to-Applications `Brim.dmg` and `Brim.zip` are on the release too, each with its own checksum. If you use one of those, macOS asks you to click Open Anyway once when you first open Brim.
 
 Prefer not to trust a download? Build it yourself, below.
 
