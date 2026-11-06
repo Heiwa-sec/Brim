@@ -28,6 +28,14 @@ Brim is **not notarized** (that needs a paid Apple Developer account; this proje
 3. Double-click `Brim.pkg`. If macOS blocks it, open **System Settings > Privacy & Security**, scroll down and click **Open Anyway** next to Brim.pkg (or right-click the file and choose Open).
 4. Follow the installer. It puts Brim in Applications and opens it. To update, run the new installer: it quits the old copy first and keeps your settings.
 
+**With Homebrew:**
+```
+brew tap Heiwa-sec/brim
+brew trust Heiwa-sec/brim
+brew install --cask brim
+```
+Recent Homebrew versions need the `brew trust` step once for third-party taps. macOS still asks for Open Anyway the first time you open Brim.
+
 A drag-to-Applications `Brim.dmg` and `Brim.zip` are on the release too, each with its own checksum. If you use one of those, macOS asks you to click Open Anyway once when you first open Brim.
 
 Prefer not to trust a download? Build it yourself, below.
