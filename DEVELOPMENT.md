@@ -21,10 +21,11 @@ Target: macOS 26+, Apple Silicon, Swift 6, SwiftUI plus AppKit, agent app (`LSUI
 | f Settings and polish | Built and committed (settings window, 4 tabs); awaiting the maintainer's test. Per-display and hover options exist; polish items not done | Plan: the phase plan (kept outside the repo) |
 | g Notification mirroring | Built, committed and **checked here** (real notifications mirrored with Full Disk Access); off by default; awaiting the maintainer's test | Plan: the phase plan (kept outside the repo) |
 | h Lock-screen integration | **Dropped** (2026-11-05). Nothing from a normal app can show on the macOS 27 lock screen; the wallpaper trick was judged too risky for the Aerial wallpaper. Replaced by an opt-in full-screen Now Playing view on ⌥⌘L | Built, committed, checked here |
+| 6 Distribution (DMG and Homebrew tap) | Release script builds `Brim.dmg` (drag to Applications) plus checksums, README install section rewritten, tap files drafted in `~/Documents/Brim-tap/` (outside the repo). **Tap not published, no release with a DMG yet** | Needs a new release (v1.2) so the cask has a DMG to point at; steps in `~/Documents/Brim-tap/COMMANDS.md` |
 
 ### Published
 
-To ship a new version: bump `CFBundleShortVersionString` and `CFBundleVersion` in `project.yml`, run `./scripts/release.sh`, then `gh release create vX.Y build/release/Brim.zip build/release/Brim.zip.sha256 --repo Heiwa-sec/Brim`. `gh` is installed with Homebrew and signed in as Heiwa-sec.
+To ship a new version: bump `CFBundleShortVersionString` and `CFBundleVersion` in `project.yml`, run `./scripts/release.sh`, then `gh release create vX.Y build/release/Brim.dmg build/release/Brim.dmg.sha256 build/release/Brim.zip build/release/Brim.zip.sha256 --repo Heiwa-sec/Brim`. After the release exists, update `version` and `sha256` (from `Brim.dmg.sha256`) in `Casks/brim.rb` of the Homebrew tap (`Heiwa-sec/homebrew-brim`; local draft in `~/Documents/Brim-tap/`, publishing commands in its `COMMANDS.md`) and push it. `gh` is installed with Homebrew and signed in as Heiwa-sec.
 
 Security audit done 2026-11-05: no secrets in code or history, only two HTTPS calls, reply-size caps added, hardened runtime on, no dead code. Open limits: not sandboxed, one private macOS function (brightness), media helper runs through `/usr/bin/perl`, vendored mediaremote-adapter not read beyond its license.
 
