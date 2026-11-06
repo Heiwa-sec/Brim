@@ -29,6 +29,7 @@ Target: macOS 26+, Apple Silicon, Swift 6, SwiftUI plus AppKit, agent app (`LSUI
 | 6 Distribution (DMG and Homebrew tap) | Release script builds `Brim.dmg` (drag to Applications) plus checksums, README install section rewritten, tap files drafted in `~/Documents/Brim-tap/` (outside the repo). **Tap not published, no release with a DMG yet** | Needs a new release (v1.2) so the cask has a DMG to point at; steps in `~/Documents/Brim-tap/COMMANDS.md` |
 
 ### Published
+Brim is public at https://github.com/Heiwa-sec/Brim (MIT). Releases: v1.0 (2026-11-05) and v1.1 (lyrics scroll fix). Each holds `Brim.zip` and `Brim.zip.sha256`, built by `scripts/release.sh` (which now also writes `Brim.dmg` and `Brim.dmg.sha256`; releases from v1.2 on should attach all four). It is signed with a free Apple Development certificate, so it is not notarized; the README tells users to check the checksum and use Open Anyway. The certificate's name contains the maintainer's iCloud email and ships inside every download (cannot be changed without a different certificate). Git history uses the numbered GitHub noreply address (`352730377+Heiwa-sec@users.noreply.github.com`). A copy of the pre-publish code and history is at `~/Documents/Backups/Brim-backup-2026-11-05` (outside the repo; never push it).
 
 To ship a new version: bump `CFBundleShortVersionString` and `CFBundleVersion` in `project.yml`, run `./scripts/release.sh`, then `gh release create vX.Y build/release/Brim.dmg build/release/Brim.dmg.sha256 build/release/Brim.zip build/release/Brim.zip.sha256 --repo Heiwa-sec/Brim`. After the release exists, update `version` and `sha256` (from `Brim.dmg.sha256`) in `Casks/brim.rb` of the Homebrew tap (`Heiwa-sec/homebrew-brim`; local draft in `~/Documents/Brim-tap/`, publishing commands in its `COMMANDS.md`) and push it. `gh` is installed with Homebrew and signed in as Heiwa-sec.
 
@@ -103,6 +104,7 @@ Lyrics button (island and ⌥⌘L): does it toggle, persist after relaunch, and 
 - **Privacy:** no analytics or telemetry. Only lyrics (LRCLIB) and weather (Open-Meteo) use the network, and both are toggleable.
 - **Safety:** never test lock behaviour without Touch ID available (nothing in Brim locks the Mac now).
 - **Event-driven only:** no polling timers. Allowed one-shots: hover delay, delayed panel shrink, next-lyric-line timer.
+- **Commits** carry no co-author or generated-by trailers.
 
 ---
 
