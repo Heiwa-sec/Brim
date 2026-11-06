@@ -21,14 +21,23 @@ macOS 26 or later on an Apple Silicon Mac. Built and tested on a MacBook Air wit
 
 ## Install
 
-Brim is **not notarized** (that needs a paid Apple Developer account; this project uses a free one), so macOS shows one warning the first time you open the installer: it "cannot verify" Brim is free of malware. This is expected.
+You do **not** need Xcode. Brim is a ready-to-run app; pick whichever route you like.
 
-1. Download `Brim.pkg` and `Brim.pkg.sha256` from the [latest release](../../releases/latest).
-2. Optional: in Terminal, in the download folder, run `shasum -a 256 -c Brim.pkg.sha256`. It must print `Brim.pkg: OK`.
-3. Double-click `Brim.pkg`. If macOS blocks it, open **System Settings > Privacy & Security**, scroll down and click **Open Anyway** next to Brim.pkg (or right-click the file and choose Open).
-4. Follow the installer. It puts Brim in Applications and opens it. To update, run the new installer: it quits the old copy first and keeps your settings.
+**1. One line in Terminal (no warning from macOS):**
+```
+curl -fsSL https://raw.githubusercontent.com/Heiwa-sec/Brim/main/scripts/install.sh | sh
+```
+It downloads the latest release, checks its SHA-256, puts Brim in Applications and opens it. Run it again to update. You can read the script first: [scripts/install.sh](scripts/install.sh).
 
-**With Homebrew:**
+**2. Normal installer (double-click):**
+1. Download `Brim.pkg` from the [latest release](../../releases/latest).
+2. Double-click it and follow the steps. Brim lands in Applications and opens.
+3. Brim is **not notarized** (that needs a paid Apple Developer account), so macOS warns the first time. Open **System Settings > Privacy & Security**, scroll down and click **Open Anyway** next to Brim.pkg. This is expected.
+4. To update, run the new installer: it quits the old copy and keeps your settings.
+
+Optional: check the download with `shasum -a 256 -c Brim.pkg.sha256` (it must print `Brim.pkg: OK`). A drag-to-Applications `Brim.dmg` and a `Brim.zip` are on the release too; macOS asks for **Open Anyway** once with those.
+
+**3. Homebrew:**
 ```
 brew tap Heiwa-sec/brim
 brew trust Heiwa-sec/brim
@@ -36,13 +45,11 @@ brew install --cask brim
 ```
 Recent Homebrew versions need the `brew trust` step once for third-party taps. macOS still asks for Open Anyway the first time you open Brim.
 
-A drag-to-Applications `Brim.dmg` and `Brim.zip` are on the release too, each with its own checksum. If you use one of those, macOS asks you to click Open Anyway once when you first open Brim.
-
 Prefer not to trust a download? Build it yourself, below.
 
 ## Build from source
 
-You need Xcode 26 or later and [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`).
+Only needed if you want to change the code. You need Xcode 26 or later and [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`).
 
 ```
 git clone <this repo>
