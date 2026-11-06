@@ -149,7 +149,8 @@ final class IslandController {
         }
         if isClick {
             // a click on the island keeps it open; a click elsewhere releases it
-            if inside { grow { [model] in model.pinned = true } } else { model.pinned = false }
+            // grow() lays out and draws the whole island synchronously, ahead of the click: only do that when it is not open yet.
+            if inside { if model.state == .expanded { model.pinned = true } else { grow { [model] in model.pinned = true } } } else { model.pinned = false }
             return
         }
         if !inside {

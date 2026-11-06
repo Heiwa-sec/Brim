@@ -41,39 +41,51 @@ final class PlaylistModel {
         }
     }
 
-    /// Plays track `index` inside the same playlist, so playback carries on from there.
+    /// True once a song was started from the list: Music then has no queue behind it and ignores its own skip command.
+    private(set) var queueless = false
+
+    /// Plays track `index` of the playlist.
     func play(_ index: Int) {
         guard tracks.indices.contains(index) else { return }
+        queueless = true
         Task { _ = await Self.run("const M = Application('Music'); M.play(M.currentPlaylist().tracks[\(index)])") }
     }
 
-    /// Next or Previous for Apple Music. A song started from the list has no queue behind it, so Music ignores its own
-    /// skip command (it does nothing, even from AppleScript). When the song did not change, step through the playlist instead.
-    static func skip(forward: Bool) {
-        Task { _ = await run("""
-        const M = Application('Music'), forward = \(forward);
-        const id = () => { try { return M.currentTrack().persistentID() } catch (e) { return null } };
-        const before = id();
-        if (!forward && M.playerPosition() > 3) { M.playerPosition = 0 } // Previous restarts a song that is well under way
-        else {
-          if (forward) M.nextTrack(); else M.previousTrack();
-          delay(1);
-          if (before && id() === before) {
-            const p = M.currentPlaylist(), i = p.tracks.persistentID().indexOf(before), j = i + (forward ? 1 : -1);
-            if (i >= 0 && j >= 0 && j < p.tracks.length) M.play(p.tracks[j]);
-          }
+    /// Next or Previous when Music has no queue (`queueless`): it ignores its own skip, so play the neighbouring song at once.
+    /// Returns false when this does not apply and the normal skip command should be sent.
+    func skipDirect(forward: Bool, title: String?, artist: String?) -> Bool {
+        guard queueless, let i = current(title: title, artist: artist) else { return false }
+        if tracks.indices.contains(i + (forward ? 1 : -1)) { play(i + (forward ? 1 : -1)) }
+        return true
+    }
+
+    /// Safety net, run shortly after a normal skip: if Music is still on `title` it had no queue (for example a song
+    /// started before Brim restarted), so step through the playlist ourselves. A no-op when the skip worked.
+    func skipIfStuck(forward: Bool, title: String) {
+        Task {
+            let result = await Self.run("""
+            function run(argv) {
+              const M = Application('Music'), forward = argv[0] === 'true';
+              if (M.currentTrack().name() !== argv[1]) return 'ok';
+              const id = M.currentTrack().persistentID(), p = M.currentPlaylist();
+              const i = p.tracks.persistentID().indexOf(id), j = i + (forward ? 1 : -1);
+              if (i < 0 || j < 0 || j >= p.tracks.length) return 'ok';
+              M.play(p.tracks[j]);
+              return 'queueless';
+            }
+            """, arguments: [String(forward), title])
+            if result?.hasPrefix("queueless") == true { queueless = true; if tracks.isEmpty { load() } } // load it, so the next skips take the instant path
         }
-        """) }
     }
 
     private struct Payload: Decodable { var name: String; var tracks: [PlaylistTrack] }
 
     /// Runs a JXA script off the main thread. Returns its output, or nil when Music is gone or macOS denied Automation.
-    private static func run(_ script: String) async -> String? {
+    private static func run(_ script: String, arguments: [String] = []) async -> String? {
         await Task.detached {
             let process = Process(), out = Pipe()
             process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
-            process.arguments = ["-l", "JavaScript", "-e", script]
+            process.arguments = ["-l", "JavaScript", "-e", script] + arguments
             process.standardOutput = out
             process.standardError = FileHandle.nullDevice
             guard (try? process.run()) != nil else { return nil }

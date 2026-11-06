@@ -41,7 +41,23 @@ final class NowPlayingModule: IslandModule {
     }
 
     func send(_ command: MediaCommand) {
-        if info?.bundleID == PlaylistModel.musicBundleID, command != .togglePlayPause { return PlaylistModel.skip(forward: command == .next) }
+        if info?.bundleID == PlaylistModel.musicBundleID, command != .togglePlayPause {
+            let forward = command == .next
+            // Previous restarts a song that is well under way, like the system controls do.
+            if !forward, let info, info.position(at: .now) > 3 { return seek(to: 0) }
+            if playlist.skipDirect(forward: forward, title: info?.title, artist: info?.artist) { return }
+            MediaAdapter.run(["send", String(command.rawValue)])
+            if let title = info?.title {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) { [playlist] in playlist.skipIfStuck(forward: forward, title: title) }
+            }
+            return
+        }
+        if command == .togglePlayPause, var now = info { // show the new state at once; the stream confirms it a moment later
+            now.elapsed = now.position(at: .now)
+            now.timestamp = .now
+            now.playing.toggle()
+            info = now
+        }
         MediaAdapter.run(["send", String(command.rawValue)])
     }
 
