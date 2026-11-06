@@ -20,6 +20,10 @@ final class IslandModel {
     /// A module's banner holds the island open without the pointer.
     var banner = false { didSet { notify(oldValue != banner) } }
     var activityCount = 0 { didSet { notify(oldValue != activityCount) } }
+    /// Settings > General > "Keep the notch open": the island stays expanded until the close button is pressed.
+    var keepOpen = false { didSet { notify(oldValue != keepOpen) } }
+    /// Set by the close button; cleared when the pointer next rests on the notch.
+    var dismissed = false { didSet { notify(oldValue != dismissed) } }
     var tab = IslandTab.nowPlaying { didSet { notify(oldValue != tab) } }
     /// Modules with content in the expanded island; each one beyond the first widens it.
     var expandedColumns = 1 { didSet { notify(oldValue != expandedColumns) } }
@@ -30,7 +34,7 @@ final class IslandModel {
     init(geometry: NotchGeometry) { self.geometry = geometry }
 
     var state: IslandState {
-        if hovering || pinned || banner { return .expanded }
+        if hovering || pinned || banner || (keepOpen && !dismissed) { return .expanded }
         return activityCount > 0 ? .compact : .collapsed
     }
 

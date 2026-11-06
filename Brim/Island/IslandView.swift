@@ -4,12 +4,16 @@ struct IslandView: View {
     let model: IslandModel
     let host: ModuleHost
     @State private var dropTargeted = false
+    @AppStorage("keepOpen") private var keepOpen = false
+    @AppStorage("frostedIsland") private var frosted = false
+    @AppStorage("frostedIntensity") private var frostedIntensity = 0.5
 
     private let morph = Animation.spring(response: 0.42, dampingFraction: 0.78)
 
     var body: some View {
         IslandShape(topRadius: model.topRadius, bottomRadius: model.bottomRadius)
-            .fill(.black)
+            .fill(fill)
+            .background { if frosted && model.state == .expanded { IslandShape(topRadius: model.topRadius, bottomRadius: model.bottomRadius).fill(.ultraThinMaterial) } }
             .overlay { content }
             .clipShape(IslandShape(topRadius: model.topRadius, bottomRadius: model.bottomRadius))
             .frame(width: model.size.width, height: model.size.height)
@@ -22,6 +26,14 @@ struct IslandView: View {
             .padding(.top, model.geometry.topInset)
             .opacity(model.isVisible ? 1 : 0)
             .animation(.easeOut(duration: 0.2), value: model.isVisible)
+    }
+
+    /// Frosted glass: black that thins toward the bottom, never below 45% so white text stays readable on a bright wallpaper.
+    /// The compact ears stay solid black so they join the notch.
+    private var fill: AnyShapeStyle {
+        guard frosted, model.state == .expanded else { return AnyShapeStyle(.black) }
+        let s = min(max(frostedIntensity, 0), 1)
+        return AnyShapeStyle(LinearGradient(colors: [.black.opacity(1 - 0.1 * s), .black.opacity(1 - 0.55 * s)], startPoint: .top, endPoint: .bottom))
     }
 
     @ViewBuilder private var content: some View {
@@ -70,10 +82,16 @@ struct IslandView: View {
         .animation(.easeInOut(duration: 0.2), value: host.resolve(model.tab))
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .overlay(alignment: .topTrailing) {
-            Button { SettingsWindow.shared.show() } label: { Image(systemName: "gearshape.fill").font(.system(size: 12)) }
-                .buttonStyle(.plain)
-                .foregroundStyle(.white.opacity(0.5))
-                .padding(.top, 8).padding(.trailing, 18) // beside the notch, in the menu-bar row
+            HStack(spacing: 12) { // beside the notch, in the menu-bar row
+                if keepOpen {
+                    Button { model.dismissed = true; model.hovering = false; model.pinned = false } label: { Image(systemName: "chevron.up").font(.system(size: 12, weight: .bold)) }
+                        .accessibilityLabel("Close the island")
+                }
+                Button { SettingsWindow.shared.show() } label: { Image(systemName: "gearshape.fill").font(.system(size: 12)) }
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(.white.opacity(0.5))
+            .padding(.top, 8).padding(.trailing, 18)
         }
         .overlay(alignment: .bottom) { tabDots }
         .transition(.opacity.animation(.easeOut(duration: 0.18).delay(0.14))) // appear after the shape has grown

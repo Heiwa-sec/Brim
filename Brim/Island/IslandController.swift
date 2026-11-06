@@ -13,6 +13,8 @@ final class IslandController {
     private var shrinkWork: DispatchWorkItem?
     private var scrollTotal: CGFloat = 0
     private var scrollSpent = false
+    private var leftSinceDismiss = false
+    private var defaultsObserver: NSObjectProtocol?
 
     init(screen: NSScreen, settings: DisplaySettings, host: ModuleHost) {
         self.screen = screen
@@ -28,6 +30,10 @@ final class IslandController {
         panel.orderFrontRegardless()
 
         trackActivity()
+        defaultsObserver = NotificationCenter.default.addObserver(forName: UserDefaults.didChangeNotification, object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated { self?.applyKeepOpen() }
+        }
+        applyKeepOpen()
 
         // Global monitors see pointer events over other apps, local ones over our own panel. Neither needs a permission for mouse events.
         let mask: NSEvent.EventTypeMask = [.mouseMoved, .leftMouseDragged, .leftMouseDown]
@@ -76,6 +82,12 @@ final class IslandController {
         scrollTotal = 0
     }
 
+    private func applyKeepOpen() {
+        let on = DisplaySettings.keepOpen
+        guard on != model.keepOpen else { return }
+        if on { grow { [model] in model.keepOpen = true; model.dismissed = false } } else { model.keepOpen = false }
+    }
+
     func update(screen: NSScreen, settings: DisplaySettings) {
         self.screen = screen
         model.geometry = screen.notchGeometry
@@ -87,6 +99,7 @@ final class IslandController {
     func tearDown() {
         monitors.forEach { NSEvent.removeMonitor($0) }
         monitors.removeAll()
+        defaultsObserver.map(NotificationCenter.default.removeObserver)
         hoverWork?.cancel(); shrinkWork?.cancel()
         panel.orderOut(nil)
     }
@@ -127,6 +140,12 @@ final class IslandController {
 
     private func handle(isClick: Bool) {
         let inside = frame(for: model.state).insetBy(dx: -1, dy: -1).contains(NSEvent.mouseLocation)
+        if model.dismissed { // closed with the button: stays closed until the pointer has left and come back
+            if !inside { leftSinceDismiss = true }
+            guard inside, leftSinceDismiss else { return }
+            model.dismissed = false
+            leftSinceDismiss = false
+        }
         if isClick {
             // a click on the island keeps it open; a click elsewhere releases it
             if inside { grow { [model] in model.pinned = true } } else { model.pinned = false }

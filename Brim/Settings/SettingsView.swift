@@ -31,6 +31,9 @@ struct DefaultsToggle: View {
 private struct GeneralTab: View {
     @AppStorage("hoverDelay") private var hoverDelay = 0.12
     @AppStorage("lyricsFont") private var lyricsFont = LyricsFont.standard.rawValue
+    @AppStorage("keepOpen") private var keepOpen = false
+    @AppStorage("frostedIsland") private var frosted = false
+    @AppStorage("frostedIntensity") private var frostedIntensity = 0.5
     @State private var launchAtLogin = SMAppService.mainApp.status == .enabled
     @State private var loginError: String?
 
@@ -57,6 +60,11 @@ private struct GeneralTab: View {
                 }
             }
             Text("How long the pointer rests on the notch before the island opens.").font(.caption).foregroundStyle(.secondary)
+            Toggle("Keep the notch open", isOn: $keepOpen)
+            Text("The island stays open without hovering. Close it with the ⌃ button beside the gear; hover the notch to open it again.").font(.caption).foregroundStyle(.secondary)
+            Toggle("Frosted-glass island", isOn: $frosted)
+            LabeledContent("Intensity") { Slider(value: $frostedIntensity, in: 0...1).disabled(!frosted) }
+            Text("Semi-transparent, clearer toward the bottom. It never drops below 45% black, so text stays readable.").font(.caption).foregroundStyle(.secondary)
             Text("Open these settings any time with ⌥⌘, or the gear in the island.").font(.caption).foregroundStyle(.secondary)
             Text("⌥⌘L shows what is playing full screen, with lyrics. Press any key or click to close it.").font(.caption).foregroundStyle(.secondary)
         }

@@ -10,6 +10,8 @@ struct DisplaySettings {
     /// Seconds the pointer must dwell before the island expands.
     static var hoverDelay: TimeInterval { UserDefaults.standard.object(forKey: "hoverDelay") as? Double ?? 0.12 }
 
+    static var keepOpen: Bool { UserDefaults.standard.bool(forKey: "keepOpen") }
+
     private func key(_ name: String) -> String { "display.\(id).\(name)" }
 }
 
