@@ -57,9 +57,7 @@ struct IslandView: View {
     }
 
     /// Kept open and idle: only the lyrics show, with no controls. Falls back to the normal view when there are none.
-    private var lyricsMode: Bool {
-        model.lyricsOnly && host.resolve(model.tab) == .nowPlaying && host.lyrics?.lines.isEmpty == false
-    }
+    private var lyricsMode: Bool { model.narrowLyrics }
 
     private var expandedBody: some View {
         Group {

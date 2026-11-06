@@ -56,6 +56,7 @@ final class IslandController {
             model.activityCount = host.activityCount
             let tab = host.resolve(model.tab)
             model.expandedColumns = max(1, host.views(in: tab).count)
+            model.lyricsAvailable = tab == .nowPlaying && host.lyrics?.lines.isEmpty == false
             panel.acceptsKeys = tab == .todo
             if host.wantsExpanded {
                 if !model.banner { model.tab = .nowPlaying; grow { [model] in model.banner = true } } // a banner always shows in Now Playing
@@ -105,9 +106,9 @@ final class IslandController {
     }
 
     /// Screen-space frame of the island (including the top gap) in `state`.
-    private func frame(for state: IslandState) -> NSRect {
+    private func frame(for state: IslandState, lyricsOnly: Bool? = nil) -> NSRect {
         let g = model.geometry
-        let size = IslandModel.size(for: state, geometry: g, columns: model.expandedColumns)
+        let size = IslandModel.size(for: state, geometry: g, columns: model.expandedColumns, lyricsOnly: lyricsOnly ?? model.narrowLyrics)
         let height = size.height + g.topInset
         return NSRect(x: g.centerX - size.width / 2, y: screen.frame.maxY - height, width: size.width, height: height)
     }
@@ -116,7 +117,7 @@ final class IslandController {
     /// same pass shows the old, small image centred in the bigger window for a frame, so the island seems to form mid-panel.
     private func grow(then change: @escaping @MainActor () -> Void) {
         shrinkWork?.cancel()
-        panel.setFrame(frame(for: .expanded), display: true)
+        panel.setFrame(frame(for: .expanded, lyricsOnly: false), display: true)
         panel.contentView?.layoutSubtreeIfNeeded()
         panel.displayIfNeeded()
         Task { @MainActor in change() }

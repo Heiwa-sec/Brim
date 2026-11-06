@@ -10,6 +10,8 @@ final class IslandModel {
     static let expandedSize = CGSize(width: 460, height: 190)
     static let compactEar: CGFloat = 70
     static let columnGap: CGFloat = 20
+    /// Kept open and showing only lyrics: a little wider than a plain expanded island, much narrower than one with the lyrics column.
+    static let lyricsOnlyExtra: CGFloat = 60
     /// Width added for each extra expanded column (the lyrics column is 250 pt).
     static let extraColumnWidth: CGFloat = 250 + columnGap
 
@@ -31,6 +33,11 @@ final class IslandModel {
     /// Kept open with the pointer away: the island shows only the lyrics until the pointer comes back.
     var lyricsOnly: Bool { keepOpen && !dismissed && !hovering && !pinned && !banner }
 
+    /// Set by the controller: the selected tab is Now Playing and there are lyrics to show.
+    var lyricsAvailable = false { didSet { notify(oldValue != lyricsAvailable) } }
+    /// The island shows only the lyrics and shrinks to fit them.
+    var narrowLyrics: Bool { lyricsOnly && lyricsAvailable }
+
     /// Called when `state` may have changed, so the controller can resize the panel.
     @ObservationIgnored var onStateChange: (() -> Void)?
 
@@ -44,16 +51,17 @@ final class IslandModel {
     /// With hide-until-top on, the idle island is invisible until the pointer reaches it.
     var isVisible: Bool { !hideUntilTop || state != .collapsed }
 
-    var size: CGSize { Self.size(for: state, geometry: geometry, columns: expandedColumns) }
+    var size: CGSize { Self.size(for: state, geometry: geometry, columns: expandedColumns, lyricsOnly: narrowLyrics) }
     var topRadius: CGFloat { state == .expanded ? 16 : 0 }
     var bottomRadius: CGFloat { state == .expanded ? 26 : (geometry.hasNotch ? 10 : geometry.size.height / 2) }
 
-    static func size(for state: IslandState, geometry: NotchGeometry, columns: Int = 1) -> CGSize {
+    static func size(for state: IslandState, geometry: NotchGeometry, columns: Int = 1, lyricsOnly: Bool = false) -> CGSize {
         switch state {
         case .collapsed: return geometry.size
         case .compact: return CGSize(width: geometry.size.width + compactEar * 2, height: geometry.size.height)
         case .expanded:
-            let width = max(expandedSize.width, geometry.size.width + 120) + CGFloat(max(columns, 1) - 1) * extraColumnWidth
+            let base = max(expandedSize.width, geometry.size.width + 120)
+            let width = lyricsOnly ? base + lyricsOnlyExtra : base + CGFloat(max(columns, 1) - 1) * extraColumnWidth
             return CGSize(width: width, height: expandedSize.height)
         }
     }
