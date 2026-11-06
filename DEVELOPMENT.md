@@ -53,6 +53,7 @@ Building leaves `Brim.app` copies under `build/Build/Products/`, and macOS lists
 
 ## Release
 
+0. `BRIM_FORBIDDEN='<words that must not appear>' scripts/preflight.sh` must print PREFLIGHT PASSED (secrets, hosts, entitlements, code hazards, tests, signed Release build, binary strings).
 1. Bump `CFBundleShortVersionString` and `CFBundleVersion` in `project.yml`.
 2. `scripts/release.sh` builds a Release app and writes `Brim.pkg` (double-click installer: installs to /Applications, quits the old copy, opens the new one), `Brim.dmg` and `Brim.zip`, each with a `.sha256`.
 3. `gh release create vX.Y build/release/Brim.{pkg,dmg,zip}{,.sha256} --repo Heiwa-sec/Brim`.
@@ -82,7 +83,7 @@ Keys are `display.<display-uuid>.enabled` and `display.<display-uuid>.hideUntilT
 | Full Disk Access | Notification database | Notification mirroring on |
 | Location (reduced accuracy) | Weather | Weather on |
 | Camera | Own camera in a call | Call camera on |
-| Automation (Music) | List and play the playlist | The playlist button is tapped |
+| Automation (Music) | List and play the playlist | The playlist button is tapped, or Next/Previous is first pressed while Apple Music plays |
 | Network: lrclib.net, api.open-meteo.com | Lyrics, weather | Their toggles on |
 
 No Screen Recording or Input Monitoring. Nothing is requested at launch.

@@ -71,7 +71,7 @@ Brim asks for nothing when it starts. Each permission is requested only when you
 | Accessibility | Replacing the volume and brightness overlay | HUD is on |
 | Full Disk Access | Reading new notifications from macOS's notification database | Notification mirroring is on |
 | Location (approximate) | Local weather | Weather is on |
-| Automation (Music) | Listing and playing the songs of the current Apple Music playlist | You tap the playlist button |
+| Automation (Music) | Listing and playing the songs of the current Apple Music playlist | You tap the playlist button, or first press Next or Previous while Apple Music plays |
 | Camera | Showing your own camera while a FaceTime call is active | Call camera is on |
 
 Brim is not sandboxed, because those features cannot work inside the sandbox. It does not use Screen Recording, Input Monitoring, Contacts, Photos or the microphone.

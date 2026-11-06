@@ -39,20 +39,21 @@ final class PlaylistModel {
         }
     }
 
-    /// True once a song was started from the list: Music then has no queue behind it and ignores its own skip command.
-    private(set) var queueless = false
+    /// The song Brim started with a direct play: Music has no queue behind it and ignores its own skip command.
+    /// Only while this is still the playing song does Brim step through the list itself; any other song means Music is back in charge.
+    var queuelessTrack: PlaylistTrack?
 
     /// Plays track `index` of the playlist.
     func play(_ index: Int) {
         guard tracks.indices.contains(index) else { return }
-        queueless = true
+        queuelessTrack = tracks[index]
         Task { _ = await Self.run("const M = Application('Music'); M.play(M.currentPlaylist().tracks[\(index)])") }
     }
 
-    /// Next or Previous when Music has no queue (`queueless`): it ignores its own skip, so play the neighbouring song at once.
+    /// Next or Previous when Music has no queue (`queuelessTrack`): it ignores its own skip, so play the neighbouring song at once.
     /// Returns false when this does not apply and the normal skip command should be sent.
     func skipDirect(forward: Bool, title: String?, artist: String?) -> Bool {
-        guard queueless, let i = current(title: title, artist: artist) else { return false }
+        guard let i = current(title: title, artist: artist), tracks[i] == queuelessTrack else { return false }
         if tracks.indices.contains(i + (forward ? 1 : -1)) { play(i + (forward ? 1 : -1)) }
         return true
     }
@@ -69,10 +70,13 @@ final class PlaylistModel {
               const i = p.tracks.persistentID().indexOf(id), j = i + (forward ? 1 : -1);
               if (i < 0 || j < 0 || j >= p.tracks.length) return 'ok';
               M.play(p.tracks[j]);
-              return 'queueless';
+              return JSON.stringify({ title: p.tracks[j].name(), artist: p.tracks[j].artist() });
             }
             """, arguments: [String(forward), title])
-            if result?.hasPrefix("queueless") == true { queueless = true; if tracks.isEmpty { load() } } // load it, so the next skips take the instant path
+            // Music had no queue: remember the song just played, and load the list, so the next skips take the instant path.
+            guard let data = result?.data(using: .utf8), let played = try? JSONDecoder().decode(PlaylistTrack.self, from: data) else { return }
+            queuelessTrack = played
+            if tracks.isEmpty { load() }
         }
     }
 
