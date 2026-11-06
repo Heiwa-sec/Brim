@@ -13,7 +13,6 @@ final class PlaylistModel {
     static let musicBundleID = "com.apple.Music"
 
     var tracks: [PlaylistTrack] = [] // settable so tests can fill it
-    private(set) var name = ""
     private(set) var loading = false
     private(set) var failed = false
     var open = false
@@ -31,13 +30,12 @@ final class PlaylistModel {
             let result = await Self.run(#"""
             const M = Application("Music"), p = M.currentPlaylist();
             const t = p.tracks.name(), a = p.tracks.artist();
-            JSON.stringify({ name: p.name(), tracks: t.map((n, i) => ({ title: n, artist: a[i] })) })
+            JSON.stringify(t.map((n, i) => ({ title: n, artist: a[i] })))
             """#)
             loading = false
             guard let data = result?.data(using: .utf8),
-                  let json = try? JSONDecoder().decode(Payload.self, from: data) else { failed = true; return }
-            name = json.name
-            tracks = json.tracks
+                  let list = try? JSONDecoder().decode([PlaylistTrack].self, from: data) else { failed = true; return }
+            tracks = list
         }
     }
 
@@ -77,8 +75,6 @@ final class PlaylistModel {
             if result?.hasPrefix("queueless") == true { queueless = true; if tracks.isEmpty { load() } } // load it, so the next skips take the instant path
         }
     }
-
-    private struct Payload: Decodable { var name: String; var tracks: [PlaylistTrack] }
 
     /// Runs a JXA script off the main thread. Returns its output, or nil when Music is gone or macOS denied Automation.
     private static func run(_ script: String, arguments: [String] = []) async -> String? {

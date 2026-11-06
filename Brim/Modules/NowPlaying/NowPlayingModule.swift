@@ -41,24 +41,28 @@ final class NowPlayingModule: IslandModule {
     }
 
     func send(_ command: MediaCommand) {
-        if info?.bundleID == PlaylistModel.musicBundleID, command != .togglePlayPause {
-            let forward = command == .next
-            // Previous restarts a song that is well under way, like the system controls do.
-            if !forward, let info, info.position(at: .now) > 3 { return seek(to: 0) }
-            if playlist.skipDirect(forward: forward, title: info?.title, artist: info?.artist) { return }
-            MediaAdapter.run(["send", String(command.rawValue)])
-            if let title = info?.title {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) { [playlist] in playlist.skipIfStuck(forward: forward, title: title) }
+        switch command {
+        case .togglePlayPause:
+            if var now = info { // show the new state at once; the stream confirms it a moment later
+                now.elapsed = now.position(at: .now)
+                now.timestamp = .now
+                now.playing.toggle()
+                info = now
             }
-            return
-        }
-        if command == .togglePlayPause, var now = info { // show the new state at once; the stream confirms it a moment later
-            now.elapsed = now.position(at: .now)
-            now.timestamp = .now
-            now.playing.toggle()
-            info = now
+        case .next, .previous:
+            if info?.bundleID == PlaylistModel.musicBundleID { return skipInMusic(forward: command == .next) }
         }
         MediaAdapter.run(["send", String(command.rawValue)])
+    }
+
+    /// Music ignores its own skip for a song started from the playlist list, so it gets the playlist's help (see `PlaylistModel`).
+    private func skipInMusic(forward: Bool) {
+        // Previous restarts a song that is well under way, like the system controls do.
+        if !forward, let info, info.position(at: .now) > 3 { return seek(to: 0) }
+        if playlist.skipDirect(forward: forward, title: info?.title, artist: info?.artist) { return }
+        MediaAdapter.run(["send", String((forward ? MediaCommand.next : .previous).rawValue)])
+        guard let title = info?.title else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) { [playlist] in playlist.skipIfStuck(forward: forward, title: title) }
     }
 
     func seek(to seconds: TimeInterval) { MediaAdapter.run(["seek", String(Int(seconds * 1_000_000))]) }

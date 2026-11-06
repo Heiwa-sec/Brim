@@ -7,14 +7,6 @@ struct LyricsButton: View {
     @AppStorage("module.lyrics.enabled") private var on = LyricsModule.defaultEnabled
 
     var body: some View {
-        Button { on.toggle() } label: {
-            Image(systemName: on ? "quote.bubble.fill" : "quote.bubble")
-                .font(.system(size: 15 * scale, weight: .semibold))
-                .foregroundStyle(.white.opacity(scale == 1 ? (on ? 0.6 : 0.35) : (on ? 1 : 0.55)))
-                .frame(width: 34 * scale, height: 34 * scale)
-        }
-        .buttonStyle(.plain)
-        .controlBackground(.circle, subtle: scale == 1)
-        .accessibilityLabel(on ? "Hide lyrics" : "Show lyrics")
+        CircleControlButton(symbol: on ? "quote.bubble.fill" : "quote.bubble", on: on, label: on ? "Hide lyrics" : "Show lyrics", scale: scale) { on.toggle() }
     }
 }

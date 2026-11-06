@@ -22,6 +22,6 @@ struct WeatherView: View {
             Text(info.description).font(.caption).foregroundStyle(.white.opacity(0.7))
         }
         .foregroundStyle(.white)
-        .frame(width: FileTrayView.width, alignment: .leading)
+        .frame(width: IslandModel.columnWidth, alignment: .leading)
     }
 }

@@ -2,8 +2,6 @@ import AppKit
 import SwiftUI
 
 struct FileTrayView: View {
-    static let width: CGFloat = 215 // with player and lyrics beside it, 250 overflowed the island padding
-
     let module: FileTrayModule
 
     var body: some View {
@@ -30,6 +28,6 @@ struct FileTrayView: View {
             }
         }
         .foregroundStyle(.white)
-        .frame(width: Self.width)
+        .frame(width: IslandModel.columnWidth)
     }
 }

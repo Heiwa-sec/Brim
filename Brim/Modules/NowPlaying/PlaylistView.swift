@@ -8,18 +8,11 @@ struct PlaylistButton: View {
     var body: some View {
         if module.info?.bundleID == PlaylistModel.musicBundleID {
             let playlist = module.playlist
-            Button {
+            CircleControlButton(symbol: playlist.open ? "list.bullet.circle.fill" : "list.bullet", on: playlist.open,
+                                label: playlist.open ? "Hide playlist" : "Show playlist", scale: scale) {
                 playlist.open.toggle()
                 if playlist.open { playlist.load() }
-            } label: {
-                Image(systemName: playlist.open ? "list.bullet.circle.fill" : "list.bullet")
-                    .font(.system(size: 15 * scale, weight: .semibold))
-                    .foregroundStyle(.white.opacity(scale == 1 ? (playlist.open ? 0.6 : 0.35) : (playlist.open ? 1 : 0.55)))
-                    .frame(width: 34 * scale, height: 34 * scale)
             }
-            .buttonStyle(.plain)
-            .controlBackground(.circle, subtle: scale == 1)
-            .accessibilityLabel(playlist.open ? "Hide playlist" : "Show playlist")
         }
     }
 }

@@ -10,6 +10,8 @@ final class IslandModel {
     static let expandedSize = CGSize(width: 460, height: 190)
     static let compactEar: CGFloat = 70
     static let columnGap: CGFloat = 20
+    /// Width of the side columns (tray, battery, weather, notification card). With the player and lyrics beside it, 250 overflowed the padding.
+    static let columnWidth: CGFloat = 215
     /// Kept open and showing only lyrics: a little wider than a plain expanded island, much narrower than one with the lyrics column.
     static let lyricsOnlyExtra: CGFloat = 60
     /// Width added for each extra expanded column (the lyrics column is 250 pt).

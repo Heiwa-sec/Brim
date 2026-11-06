@@ -6,8 +6,6 @@ extension NotificationsModule {
 }
 
 struct NotificationCard: View {
-    static let width: CGFloat = 215 // same column width as the tray
-
     let record: NotificationRecord
 
     var body: some View {
@@ -19,7 +17,7 @@ struct NotificationCard: View {
             }
         }
         .foregroundStyle(.white)
-        .frame(width: Self.width, alignment: .leading)
+        .frame(width: IslandModel.columnWidth, alignment: .leading)
     }
 
     private var icon: NSImage {

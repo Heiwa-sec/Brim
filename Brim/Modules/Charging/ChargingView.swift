@@ -22,8 +22,6 @@ extension ChargingModule {
 }
 
 struct ChargingView: View {
-    static let width: CGFloat = 215 // same column width as the tray
-
     let info: PowerInfo
 
     var body: some View {
@@ -34,7 +32,7 @@ struct ChargingView: View {
             Text(detail).font(.caption).foregroundStyle(.white.opacity(0.7))
         }
         .foregroundStyle(.white)
-        .frame(width: Self.width, alignment: .leading)
+        .frame(width: IslandModel.columnWidth, alignment: .leading)
     }
 
     private var detail: String {

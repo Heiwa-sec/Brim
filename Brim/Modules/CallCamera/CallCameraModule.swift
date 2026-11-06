@@ -10,7 +10,7 @@ import SwiftUI
 final class CallCameraModule: IslandModule {
     static let id = "callCamera"
     static let title = "Call camera"
-    static var defaultEnabled: Bool { false }
+    static let defaultEnabled = false
     private static let faceTime = "com.apple.FaceTime"
 
     private(set) var problem: String?

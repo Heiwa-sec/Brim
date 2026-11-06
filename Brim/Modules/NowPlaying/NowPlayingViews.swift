@@ -68,6 +68,27 @@ extension View {
     }
 }
 
+/// A round island button (lyrics, playlist): fainter in the island, bolder at full-screen size (`scale` > 1).
+struct CircleControlButton: View {
+    let symbol: String
+    let on: Bool
+    let label: String
+    var scale: CGFloat = 1
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: symbol)
+                .font(.system(size: 15 * scale, weight: .semibold))
+                .foregroundStyle(.white.opacity(scale == 1 ? (on ? 0.6 : 0.35) : (on ? 1 : 0.55)))
+                .frame(width: 34 * scale, height: 34 * scale)
+        }
+        .buttonStyle(.plain)
+        .controlBackground(.circle, subtle: scale == 1)
+        .accessibilityLabel(label)
+    }
+}
+
 struct TransportView: View {
     let module: NowPlayingModule
     var scale: CGFloat = 1
