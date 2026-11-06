@@ -21,18 +21,22 @@ macOS 26 or later on an Apple Silicon Mac. Built and tested on a MacBook Air wit
 
 ## Install
 
-Brim is **not notarized**. Notarizing needs a paid Apple Developer account, and this project is signed with a free one. macOS will warn you the first time. This is expected, and it is why you should check the download first.
+Brim is **not notarized** (that needs a paid Apple Developer account; this project uses a free one), so macOS shows one warning the first time you open it: "Apple could not verify Brim is free of malware". It is expected, and it appears whichever way you install.
 
-1. Download `Brim.zip` and `Brim.zip.sha256` from the [latest release](../../releases/latest).
-2. Check the download is the file that was published. In Terminal, in the folder you downloaded to:
-   ```
-   shasum -a 256 -c Brim.zip.sha256
-   ```
-   It must print `Brim.zip: OK`. If it does not, delete the file.
-3. Unzip, drag `Brim.app` to **Applications**, and open it. macOS will say it cannot check the app for malicious software.
-4. Go to **System Settings > Privacy & Security**, scroll down to the message about Brim and click **Open Anyway**. (On older macOS you can instead right-click the app and choose Open.)
+**Homebrew**
+```
+brew install --cask Heiwa-sec/brim/brim
+```
 
-Prefer not to trust a download? Build it yourself, below. It takes a few minutes.
+**DMG**
+
+1. Download `Brim.dmg` and `Brim.dmg.sha256` from the [latest release](../../releases/latest).
+2. In Terminal, in the download folder, run `shasum -a 256 -c Brim.dmg.sha256`. It must print `Brim.dmg: OK`; if not, delete the file.
+3. Open the DMG and drag Brim onto Applications.
+
+**First launch (both routes):** open Brim, click Done on the warning, then go to **System Settings > Privacy & Security**, scroll down to the message about Brim and click **Open Anyway**. You only do this once. `Brim.zip` is also attached to each release, with its own checksum.
+
+Prefer not to trust a download? Build it yourself, below.
 
 ## Build from source
 
