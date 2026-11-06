@@ -11,6 +11,8 @@ final class IslandController {
     private var monitors: [Any] = []
     private var hoverWork: DispatchWorkItem?
     private var shrinkWork: DispatchWorkItem?
+    private var scrollTotal: CGFloat = 0
+    private var scrollSpent = false
 
     init(screen: NSScreen, settings: DisplaySettings, host: ModuleHost) {
         self.screen = screen
@@ -34,17 +36,44 @@ final class IslandController {
         }
         monitors.append(NSEvent.addGlobalMonitorForEvents(matching: mask) { handler($0.type == .leftMouseDown) } as Any)
         monitors.append(NSEvent.addLocalMonitorForEvents(matching: mask) { handler($0.type == .leftMouseDown); return $0 } as Any)
+        // Two-finger sideways scrolls switch tabs; vertical scrolls (the lyrics) pass through untouched.
+        monitors.append(NSEvent.addLocalMonitorForEvents(matching: .scrollWheel) { [weak self] event in
+            let (dx, dy, phase, momentum) = (event.scrollingDeltaX, event.scrollingDeltaY, event.phase, event.momentumPhase)
+            MainActor.assumeIsolated { self?.scroll(dx: dx, dy: dy, phase: phase, momentum: momentum) }
+            return event
+        } as Any)
     }
 
     /// Mirrors the host's live-activity count into the model; re-arms itself because observation fires once per change.
     private func trackActivity() {
         withObservationTracking {
             model.activityCount = host.activityCount
-            model.expandedColumns = max(1, host.expandedViews.count)
-            if host.wantsExpanded { if !model.banner { grow { [model] in model.banner = true } } } else { model.banner = false }
+            let tab = host.resolve(model.tab)
+            model.expandedColumns = max(1, host.views(in: tab).count)
+            panel.acceptsKeys = tab == .todo
+            if host.wantsExpanded {
+                if !model.banner { model.tab = .nowPlaying; grow { [model] in model.banner = true } } // a banner always shows in Now Playing
+            } else { model.banner = false }
         } onChange: { [weak self] in
             Task { @MainActor in self?.trackActivity() }
         }
+    }
+
+    /// One tab step per swipe: a gesture counts once its sideways travel passes 50 pt, and not again until a new gesture begins.
+    private func scroll(dx: CGFloat, dy: CGFloat, phase: NSEvent.Phase, momentum: NSEvent.Phase) {
+        guard model.state == .expanded, frame(for: .expanded).contains(NSEvent.mouseLocation) else { return }
+        if phase.contains(.began) || phase.contains(.mayBegin) { scrollTotal = 0; scrollSpent = false }
+        guard !scrollSpent, abs(dx) > abs(dy) else { return }
+        scrollTotal += dx
+        let wheel = phase.isEmpty && momentum.isEmpty // a mouse wheel has no gesture phases
+        guard wheel || abs(scrollTotal) > 50 else { return }
+        scrollSpent = !wheel
+        let tabs = host.tabs
+        guard let i = tabs.firstIndex(of: host.resolve(model.tab)) else { return }
+        // Natural scrolling: fingers moving left (negative) bring the next tab in from the right.
+        let next = min(max(i + (scrollTotal < 0 ? 1 : -1), 0), tabs.count - 1)
+        model.tab = tabs[next]
+        scrollTotal = 0
     }
 
     func update(screen: NSScreen, settings: DisplaySettings) {

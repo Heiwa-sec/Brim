@@ -1,6 +1,7 @@
 import SwiftUI
 
 extension WeatherModule {
+    var tab: IslandTab { .weather }
     var expanded: AnyView? {
         guard let info else { return nil }
         return AnyView(WeatherView(info: info))

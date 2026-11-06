@@ -46,7 +46,8 @@ struct IslandView: View {
 
     private var expandedBody: some View {
         Group {
-            let views = host.expandedViews
+            let tab = host.resolve(model.tab)
+            let views = host.views(in: tab)
             if dropTargeted {
                 Text("Drop to add to tray")
                     .font(.callout)
@@ -55,8 +56,9 @@ struct IslandView: View {
                     .glassEffect(in: .capsule)
             } else if !views.isEmpty {
                 HStack(spacing: IslandModel.columnGap) { ForEach(views.indices, id: \.self) { views[$0] } }
+                    .id(tab)
             } else {
-                Text(host.emptyMessage)
+                Text(host.emptyMessage(in: tab))
                     .font(.callout)
                     .foregroundStyle(.white.opacity(0.7))
                     .padding(.horizontal, 16).padding(.vertical, 8)
@@ -64,7 +66,8 @@ struct IslandView: View {
             }
         }
         .padding(.top, model.geometry.size.height + 4) // stay clear of the notch
-        .padding(.horizontal, 28).padding(.bottom, 16)
+        .padding(.horizontal, 28).padding(.bottom, host.tabs.count > 1 ? 24 : 16)
+        .animation(.easeInOut(duration: 0.2), value: host.resolve(model.tab))
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .overlay(alignment: .topTrailing) {
             Button { SettingsWindow.shared.show() } label: { Image(systemName: "gearshape.fill").font(.system(size: 12)) }
@@ -72,6 +75,27 @@ struct IslandView: View {
                 .foregroundStyle(.white.opacity(0.5))
                 .padding(.top, 8).padding(.trailing, 18) // beside the notch, in the menu-bar row
         }
+        .overlay(alignment: .bottom) { tabDots }
         .transition(.opacity.animation(.easeOut(duration: 0.18).delay(0.14))) // appear after the shape has grown
+    }
+
+    /// Page dots like the iOS home screen: the current tab is a wide white pill. Scroll sideways on the island, or click a dot.
+    @ViewBuilder private var tabDots: some View {
+        let tabs = host.tabs
+        if tabs.count > 1 {
+            HStack(spacing: 6) {
+                ForEach(tabs, id: \.self) { tab in
+                    let current = tab == host.resolve(model.tab)
+                    Button { model.tab = tab } label: {
+                        Capsule().fill(.white.opacity(current ? 0.9 : 0.3)).frame(width: current ? 16 : 6, height: 6)
+                            .padding(.vertical, 4)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(tab.title)
+                }
+            }
+            .animation(.easeInOut(duration: 0.2), value: model.tab)
+            .padding(.bottom, 4)
+        }
     }
 }

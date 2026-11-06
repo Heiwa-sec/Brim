@@ -20,6 +20,7 @@ final class IslandModel {
     /// A module's banner holds the island open without the pointer.
     var banner = false { didSet { notify(oldValue != banner) } }
     var activityCount = 0 { didSet { notify(oldValue != activityCount) } }
+    var tab = IslandTab.nowPlaying { didSet { notify(oldValue != tab) } }
     /// Modules with content in the expanded island; each one beyond the first widens it.
     var expandedColumns = 1 { didSet { notify(oldValue != expandedColumns) } }
 

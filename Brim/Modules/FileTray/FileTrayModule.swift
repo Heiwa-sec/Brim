@@ -9,6 +9,7 @@ final class FileTrayModule: IslandModule {
 
     private(set) var items: [URL] = []
 
+    var tab: IslandTab { .fileTray }
     var expanded: AnyView? { items.isEmpty ? nil : AnyView(FileTrayView(module: self)) }
 
     func start() {}
