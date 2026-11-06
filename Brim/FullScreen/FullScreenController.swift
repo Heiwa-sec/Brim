@@ -36,6 +36,7 @@ final class FullScreenController {
         state.shown = false
         state.poke()
         panels = NSScreen.screens.map(makePanel)
+        NSApp.setActivationPolicy(.regular) // Dock icon, ⌘Tab and Force Quit list while open
         NSApp.activate()
         panels.first?.makeKey()
         DispatchQueue.main.async { withAnimation(Self.animation) { self.state.shown = true } }
@@ -52,6 +53,7 @@ final class FullScreenController {
             panels.forEach { $0.orderOut(nil) }
             panels = []
             closing = false
+            NSApp.setActivationPolicy(.accessory)
         }
     }
 
