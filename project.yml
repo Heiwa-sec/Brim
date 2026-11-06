@@ -27,8 +27,8 @@ targets:
       properties:
         LSUIElement: true
         CFBundleName: Brim
-        CFBundleShortVersionString: "1.3"
-        CFBundleVersion: "4"
+        CFBundleShortVersionString: "1.4"
+        CFBundleVersion: "5"
         CFBundleIconFile: AppIcon
         NSPrincipalClass: NSApplication
         NSCameraUsageDescription: Brim shows your own camera while a FaceTime call is active, only if you turn on Call camera.
