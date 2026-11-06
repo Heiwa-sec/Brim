@@ -40,7 +40,7 @@ Optional: check the download with `shasum -a 256 -c Brim.pkg.sha256` (it must pr
 
 **3. Homebrew:**
 ```
-brew tap Heiwa-sec/brim
+brew tap Heiwa-sec/brim https://github.com/Heiwa-sec/Brim
 brew trust Heiwa-sec/brim
 brew install --cask brim
 ```

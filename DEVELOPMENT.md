@@ -59,7 +59,7 @@ Building leaves `Brim.app` copies under `build/Build/Products/`, and macOS lists
 1. Bump `CFBundleShortVersionString` and `CFBundleVersion` in `project.yml`.
 2. `scripts/release.sh` builds a Release app and writes `Brim.pkg` (double-click installer: installs to /Applications, quits the old copy, opens the new one), `Brim.dmg` and `Brim.zip`, each with a `.sha256`.
 3. `gh release create vX.Y build/release/Brim.{pkg,dmg,zip}{,.sha256} --repo Heiwa-sec/Brim`.
-4. Update `version` and `sha256` (from `Brim.dmg.sha256`) in `Casks/brim.rb` of the Homebrew tap `Heiwa-sec/homebrew-brim` and push.
+4. Update `version` and `sha256` (from `Brim.dmg.sha256`) in `Casks/brim.rb` in this repo (it doubles as the Homebrew tap) and push.
 
 `scripts/install.sh` (the Terminal one-liner in the README) always downloads the latest release's `Brim.zip`, checks its checksum and installs it. Files fetched with curl are not quarantined, so macOS shows no warning. The `.pkg`, `.dmg` and Homebrew routes still need Open Anyway once, because the app is not notarized. The signing certificate's name, which contains an email address, ships inside the app's signature.
 
