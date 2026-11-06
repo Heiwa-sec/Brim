@@ -1,5 +1,4 @@
 import XCTest
-@testable import Brim
 
 @MainActor
 final class IslandModelTests: XCTestCase {

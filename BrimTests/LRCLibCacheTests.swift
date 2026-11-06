@@ -1,5 +1,4 @@
 import XCTest
-@testable import Brim
 
 final class LRCLibCacheTests: XCTestCase {
     private let day: TimeInterval = 86_400
