@@ -15,7 +15,7 @@ All features below are built, committed and were checked on a real Mac. Untested
 | Island, notch geometry | Expands from the notch; the window pre-grows before the spring starts. Hover delay, per-display options, hide-until-top |
 | Now Playing | Cover, title, scrubber, transport buttons. Data comes from the vendored mediaremote-adapter (see Gotchas) |
 | Lyrics | LRCLIB synced lyrics, current line filled with an artwork-colour gradient. Lyrics button turns the module on and off |
-| Full-screen view | ⌥⌘L or click the cover: blurred drifting cover, big cover and lyrics, auto-hiding controls. Esc or a click on the background closes it |
+| Full-screen view | ⌥⌘L or click the cover: blurred drifting cover, big cover and lyrics, auto-hiding controls. Esc or a click on the background closes it. While it is open Brim switches to a regular app (Dock icon, ⌘Tab, Force Quit list) and back to an agent app when it closes (`FullScreenController`, `setActivationPolicy`) |
 | Tabs | Now Playing, Weather, To-do, File tray; two-finger sideways scroll or click a page dot. `IslandTab`, `ModuleHost.tabs/views(in:)/resolve` |
 | Playlist swap | Apple Music only. List button beside the transport buttons (island and full screen) lists the playlist; a click plays that song. See Gotchas |
 | Keep the notch open | Island stays open; with the pointer away it shows only centred lyrics and shrinks (`IslandModel.narrowLyrics`); hover brings back the full view. A chevron beside the gear closes it |
@@ -28,7 +28,7 @@ All features below are built, committed and were checked on a real Mac. Untested
 | HUD (off by default) | `CGEventTap` on media keys, CoreAudio volume, DisplayServices brightness through `dlsym`; needs Accessibility |
 | Notification mirroring (off by default) | Reads usernoted's database read-only (Full Disk Access); a vnode source on the write-ahead log signals new rows; the banner lags about 5 s because macOS writes the database late |
 | Call camera (off by default) | Your own camera in a floating window while FaceTime runs and the camera is in use by another app. The other person's video is not built: no public API; only ScreenCaptureKit window capture (Screen Recording permission) |
-| Settings | General, Modules, Displays, Permissions; opens from the gear, ⌥⌘, or relaunching the app. General ends with **Uninstall Brim…** (`Uninstaller`: moves the app to the Trash first, so a failure changes nothing, then removes the login item, preferences, caches and `tccutil reset`s the permissions it can) |
+| Settings | General, Modules, Displays, Permissions; opens from the gear, ⌥⌘, or relaunching the app. Permissions tab: **Allow** shows the system prompt for Accessibility, Location and Camera; for Full Disk Access (no prompt exists, and macOS does not list the app by itself) it opens the pane and reveals Brim.app in Finder to drag in. General ends with **Uninstall Brim…** (`Uninstaller`: moves the app to the Trash first, so a failure changes nothing, then removes the login item, preferences, caches and `tccutil reset`s the permissions it can) |
 | Lock screen | Dropped: nothing from a normal app can draw on the macOS 27 lock screen (private SkyLight calls are rejected, a shielding-level window never showed). The full-screen view replaces it |
 
 ## Rules for this project
@@ -88,9 +88,11 @@ Keys are `display.<display-uuid>.enabled` and `display.<display-uuid>.hideUntilT
 | Automation (Music) | List and play the playlist | The playlist button is tapped, or Next/Previous is first pressed while Apple Music plays |
 | Network: lrclib.net, api.open-meteo.com | Lyrics, weather | Their toggles on |
 
-No Screen Recording or Input Monitoring. Nothing is requested at launch.
+Full Disk Access cannot be requested by a prompt: the user drags Brim into the list (or clicks +), enters their password and reopens Brim. No Screen Recording or Input Monitoring. Nothing is requested at launch.
 
 ## Gotchas
+
+- **Unit tests need a Debug build of Brim first.** After `rm -rf build` (or deleting `build/Build/Products`), `xcodebuild ... -scheme BrimTests test` fails with "Unable to resolve module dependency: 'Brim'". Run `xcodebuild -scheme Brim -configuration Debug -derivedDataPath build build` once, then the tests (and `scripts/preflight.sh`) pass.
 
 - **Adding a source file:** run `xcodegen generate`. `Brim.xcodeproj` is generated and not committed. SourceKit reports "Cannot find type ..." across files until it is regenerated; trust `xcodebuild`.
 - **Now Playing** uses the vendored mediaremote-adapter, run through Apple's own `/usr/bin/perl`, because macOS locks MediaRemote for ordinary apps. `MediaAdapter` streams JSON from it and sends commands (`send 2`, `send 4`, `send 5`, `seek`).
