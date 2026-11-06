@@ -21,6 +21,7 @@ final class LyricsModule: IslandModule {
     var expanded: AnyView? { lines.isEmpty ? nil : AnyView(LyricsView(module: self)) }
 
     func start() {
+        Task.detached(priority: .background) { LRCLibClient.pruneCache() }
         generation += 1
         track(generation)
     }

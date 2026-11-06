@@ -11,7 +11,7 @@ struct SettingsView: View {
             DisplaysTab().tabItem { Label("Displays", systemImage: "display") }
             PermissionsTab().tabItem { Label("Permissions", systemImage: "lock.shield") }
         }
-        .frame(width: 420, height: 400)
+        .frame(width: 420, height: 540)
     }
 }
 
@@ -36,6 +36,7 @@ private struct GeneralTab: View {
     @AppStorage("frostedIntensity") private var frostedIntensity = 0.5
     @State private var launchAtLogin = SMAppService.mainApp.status == .enabled
     @State private var loginError: String?
+    @State private var confirmUninstall = false
 
     var body: some View {
         Form {
@@ -67,6 +68,12 @@ private struct GeneralTab: View {
             Text("Semi-transparent, clearer toward the bottom. It never drops below 45% black, so text stays readable.").font(.caption).foregroundStyle(.secondary)
             Text("Open these settings any time with ⌥⌘, or the gear in the island.").font(.caption).foregroundStyle(.secondary)
             Text("⌥⌘L shows what is playing full screen, with lyrics. Press any key or click to close it.").font(.caption).foregroundStyle(.secondary)
+            Button("Uninstall Brim…", role: .destructive) { confirmUninstall = true }
+                .confirmationDialog("Uninstall Brim?", isPresented: $confirmUninstall) {
+                    Button("Uninstall", role: .destructive, action: Uninstaller.run)
+                } message: {
+                    Text("Moves Brim to the Trash and deletes its settings, to-do list and cached lyrics.")
+                }
         }
         .formStyle(.grouped)
     }

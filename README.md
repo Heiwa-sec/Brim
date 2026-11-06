@@ -48,6 +48,10 @@ Recent Homebrew versions need the `brew trust` step once for third-party taps. m
 
 Prefer not to trust a download? Build it yourself, below.
 
+## Uninstall
+
+Open **Settings > General > Uninstall Brim…** (Settings opens with ⌥⌘, or the gear in the island). It moves Brim to the Trash, turns off Open at login, and deletes its settings, to-do list and cached lyrics. macOS keeps the Accessibility and Full Disk Access entries for an uninstalled app; remove them in System Settings > Privacy & Security if you want. Installed with Homebrew? Use `brew uninstall --cask brim` instead.
+
 ## Build from source
 
 Only needed if you want to change the code. You need Xcode 26 or later and [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`).
@@ -80,7 +84,7 @@ Brim is not sandboxed, because those features cannot work inside the sandbox. It
 
 No accounts, analytics or telemetry. Brim talks to the network in two places, both over HTTPS and both optional:
 
-- **lrclib.net:** the title and artist of the current song, to find lyrics. Answers are cached in `~/Library/Caches/Brim/lyrics`.
+- **lrclib.net:** the title and artist of the current song, to find lyrics. Answers are cached in `~/Library/Caches/Brim/lyrics`: lyrics for 90 days, "not found" for a week, and older files are deleted when Brim starts.
 - **api.open-meteo.com:** your location rounded to about 11 km, only if you turn Weather on.
 
 Call camera shows your own camera on screen only while a FaceTime call is active. The video is never recorded, saved or sent anywhere.

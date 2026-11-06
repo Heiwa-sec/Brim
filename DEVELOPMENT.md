@@ -28,7 +28,7 @@ All features below are built, committed and were checked on a real Mac. Untested
 | HUD (off by default) | `CGEventTap` on media keys, CoreAudio volume, DisplayServices brightness through `dlsym`; needs Accessibility |
 | Notification mirroring (off by default) | Reads usernoted's database read-only (Full Disk Access); a vnode source on the write-ahead log signals new rows; the banner lags about 5 s because macOS writes the database late |
 | Call camera (off by default) | Your own camera in a floating window while FaceTime runs and the camera is in use by another app. The other person's video is not built: no public API; only ScreenCaptureKit window capture (Screen Recording permission) |
-| Settings | General, Modules, Displays, Permissions; opens from the gear, ⌥⌘, or relaunching the app |
+| Settings | General, Modules, Displays, Permissions; opens from the gear, ⌥⌘, or relaunching the app. General ends with **Uninstall Brim…** (`Uninstaller`: moves the app to the Trash first, so a failure changes nothing, then removes the login item, preferences, caches and `tccutil reset`s the permissions it can) |
 | Lock screen | Dropped: nothing from a normal app can draw on the macOS 27 lock screen (private SkyLight calls are rejected, a shielding-level window never showed). The full-screen view replaces it |
 
 ## Rules for this project
@@ -52,6 +52,8 @@ Idle: about 0.0% CPU, 15 MB, 0 leaks. An animated SF Symbol in the compact pill 
 Building leaves `Brim.app` copies under `build/Build/Products/`, and macOS lists them as extra apps. Install the release build to `/Applications` and delete the copies in `build/`.
 
 ## Release
+
+`main` is branch-protected on GitHub: no force-push and no deletion, also for the admin. A history rewrite needs the protection lifted in the repo settings first, then restored.
 
 0. `BRIM_FORBIDDEN='<words that must not appear>' scripts/preflight.sh` must print PREFLIGHT PASSED (secrets, hosts, entitlements, code hazards, tests, signed Release build, binary strings).
 1. Bump `CFBundleShortVersionString` and `CFBundleVersion` in `project.yml`.
@@ -94,7 +96,7 @@ No Screen Recording or Input Monitoring. Nothing is requested at launch.
 - **Now Playing** uses the vendored mediaremote-adapter, run through Apple's own `/usr/bin/perl`, because macOS locks MediaRemote for ordinary apps. `MediaAdapter` streams JSON from it and sends commands (`send 2`, `send 4`, `send 5`, `seek`).
 - **Apple Music queue:** Music ignores its own Next/Previous (even from AppleScript) after a song is started with `play track N`, because that leaves no queue. `PlaylistModel` remembers that (`queueless`) and plays the neighbouring track directly. When Brim does not know, `NowPlayingModule.skipInMusic` sends the normal skip and `PlaylistModel.skipIfStuck` checks 0.7 s later. The playlist is read and played with JXA through `/usr/bin/osascript`, only when the list button is tapped. Spotify cannot list a playlist and browsers expose no queue, so the button only shows for Apple Music.
 - **Click latency:** a click on an already-open island must not call `IslandController.grow`; it lays out and draws the whole island synchronously before the click reaches the button. Play/pause flips its icon at once and the stream confirms it later.
-- **"No lyrics" is silent by design.** Instrumental and unknown tracks leave the island narrow. Check `~/Library/Caches/Brim/lyrics/` to see what LRCLIB answered (`GET /api/get?track_name=&artist_name=`; 200 with `syncedLyrics`, or 404).
+- **"No lyrics" is silent by design.** Instrumental and unknown tracks leave the island narrow. The lyrics cache expires (found lyrics 90 days, "not found" 7 days, stale lyrics are still used if the network fails; `LRCLibClient.pruneCache` deletes files older than 90 days when the module starts). Check `~/Library/Caches/Brim/lyrics/` to see what LRCLIB answered (`GET /api/get?track_name=&artist_name=`; 200 with `syncedLyrics`, or 404).
 - **Drag events:** during a drag macOS sends `leftMouseDragged`, not `mouseMoved`; the controller listens for both. For synthetic drag tests, hover the notch first and wait about a second before pressing on the tray icon.
 - **Column width:** the side columns are `IslandModel.columnWidth` (215 pt); 250 overflowed the island padding.
 - **Full-screen controls** hide after 3 s without input and stop taking clicks; move the pointer first.
