@@ -48,7 +48,7 @@ struct NowPlayingExpandedView: View {
                     Text(module.info?.artist ?? module.info?.album ?? "").font(.subheadline).foregroundStyle(.white.opacity(0.65)).lineLimit(1)
                 }
                 ScrubberView(module: module)
-                TransportView(module: module)
+                TransportView(module: module).overlay(alignment: .trailing) { LyricsButton() }
             }
         }
         .foregroundStyle(.white)

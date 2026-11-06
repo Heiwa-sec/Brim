@@ -17,6 +17,7 @@ Target: macOS 26+, Apple Silicon, Swift 6, SwiftUI plus AppKit, agent app (`LSUI
 | b Now Playing | Done, committed, **verified live by the maintainer (2026-11-04)** | Real playback works; buttons respond on the first click |
 | c Lyrics | Done, committed, **verified live by the maintainer (2026-11-05)** | Apple Music text style: 21 pt bold, current line gradient, others white 35% |
 | d File tray | Done, committed, **verified live by the maintainer (2026-11-05)** | Drop, drag out, Clear, three columns all work |
+| i Lyrics button | Built and committed; awaiting the maintainer's test. Writes `module.lyrics.enabled`, the same key as Settings > Modules, so off means no fetch and a narrow island | Island and full-screen view (fades with the controls) |
 | e System (plan: the phase plan (kept outside the repo)) | e1 Charging, e2 Bluetooth (removed 2026-11-05 at the maintainer's request), e3 Weather, e4 HUD all built, merged and committed; **none tested live by the maintainer yet** | Weather and HUD are off by default |
 | f Settings and polish | Built and committed (settings window, 4 tabs); awaiting the maintainer's test. Per-display and hover options exist; polish items not done | Plan: the phase plan (kept outside the repo) |
 | g Notification mirroring | Built, committed and **checked here** (real notifications mirrored with Full Disk Access); off by default; awaiting the maintainer's test | Plan: the phase plan (kept outside the repo) |
@@ -61,7 +62,7 @@ Phase (d) as built: `Brim/Modules/FileTray/` holds `FileTrayModule` (file URLs i
 - **Not tested without music:** anything depending on real playback (lyrics, scrubber, buttons). Build the feature, then hand the maintainer an exact checklist.
 
 ### Open questions for the maintainer
-None open except the ⌥⌘L lock test in "Next step".
+Lyrics button (island and ⌥⌘L): does it toggle, persist after relaunch, and fade with the controls? Also: the ⌥⌘L lock test in "Next step".
 
 ### Session log
 - **2026-11-05 (published):** audit fixes, MIT license, public README (this file holds the old one), release script, history rewritten to the noreply address, repo created, code pushed and v1.0 released through `gh`. Next: the maintainer's live tests (see Next step), then feedback from real users.

@@ -126,6 +126,7 @@ private struct FullScreenView: View {
                     .frame(width: 420)
                     ScrubberView(module: nowPlaying).frame(width: 420)
                     TransportView(module: nowPlaying, scale: 1.5)
+                        .overlay(alignment: .trailing) { LyricsButton(scale: 1.5) }
                         .frame(width: 420)
                         .opacity(state.controlsVisible ? 1 : 0)
                         .allowsHitTesting(state.controlsVisible)
