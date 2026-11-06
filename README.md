@@ -61,8 +61,9 @@ Brim asks for nothing when it starts. Each permission is requested only when you
 | Accessibility | Replacing the volume and brightness overlay | HUD is on |
 | Full Disk Access | Reading new notifications from macOS's notification database | Notification mirroring is on |
 | Location (approximate) | Local weather | Weather is on |
+| Camera | Showing your own camera while a FaceTime call is active | Call camera is on |
 
-Brim is not sandboxed, because those features cannot work inside the sandbox. It does not use Screen Recording, Input Monitoring, Contacts, Photos or the camera or microphone.
+Brim is not sandboxed, because those features cannot work inside the sandbox. It does not use Screen Recording, Input Monitoring, Contacts, Photos or the microphone.
 
 ## Privacy
 
@@ -70,6 +71,8 @@ No accounts, analytics or telemetry. Brim talks to the network in two places, bo
 
 - **lrclib.net:** the title and artist of the current song, to find lyrics. Answers are cached in `~/Library/Caches/Brim/lyrics`.
 - **api.open-meteo.com:** your location rounded to about 11 km, only if you turn Weather on.
+
+Call camera shows your own camera on screen only while a FaceTime call is active. The video is never recorded, saved or sent anywhere.
 
 Notification mirroring reads the title, text and app name of new notifications, read-only, keeps them in memory while the banner shows, and never logs, saves or sends them.
 

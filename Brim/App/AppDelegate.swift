@@ -8,7 +8,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         let nowPlaying = NowPlayingModule()
         let lyrics = LyricsModule(nowPlaying: nowPlaying)
-        let host = ModuleHost(modules: [nowPlaying, lyrics, FileTrayModule(), TodoModule(), ChargingModule(), WeatherModule(), HUDModule(), NotificationsModule()])
+        let host = ModuleHost(modules: [nowPlaying, lyrics, FileTrayModule(), TodoModule(), CallCameraModule(), ChargingModule(), WeatherModule(), HUDModule(), NotificationsModule()])
         self.host = host
         displays = DisplayManager(host: host)
         fullScreen = FullScreenController(nowPlaying: nowPlaying, lyrics: lyrics)

@@ -30,11 +30,13 @@ targets:
         CFBundleShortVersionString: "1.1"
         CFBundleVersion: "2"
         NSPrincipalClass: NSApplication
+        NSCameraUsageDescription: Brim shows your own camera while a FaceTime call is active, only if you turn on Call camera.
         NSLocationWhenInUseUsageDescription: Brim uses your approximate location (about 10 km) to show the local weather.
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: dev.brim.Brim
         GENERATE_INFOPLIST_FILE: NO
+        CODE_SIGN_ENTITLEMENTS: Brim/App/Brim.entitlements
   # Vendored BSD-3 framework (ungive/mediaremote-adapter), unmodified. Symbols must stay visible: Perl calls into it.
   MediaRemoteAdapter:
     type: framework
