@@ -47,6 +47,25 @@ final class PlaylistModel {
         Task { _ = await Self.run("const M = Application('Music'); M.play(M.currentPlaylist().tracks[\(index)])") }
     }
 
+    /// Next or Previous for Apple Music. A song started from the list has no queue behind it, so Music ignores its own
+    /// skip command (it does nothing, even from AppleScript). When the song did not change, step through the playlist instead.
+    static func skip(forward: Bool) {
+        Task { _ = await run("""
+        const M = Application('Music'), forward = \(forward);
+        const id = () => { try { return M.currentTrack().persistentID() } catch (e) { return null } };
+        const before = id();
+        if (!forward && M.playerPosition() > 3) { M.playerPosition = 0 } // Previous restarts a song that is well under way
+        else {
+          if (forward) M.nextTrack(); else M.previousTrack();
+          delay(1);
+          if (before && id() === before) {
+            const p = M.currentPlaylist(), i = p.tracks.persistentID().indexOf(before), j = i + (forward ? 1 : -1);
+            if (i >= 0 && j >= 0 && j < p.tracks.length) M.play(p.tracks[j]);
+          }
+        }
+        """) }
+    }
+
     private struct Payload: Decodable { var name: String; var tracks: [PlaylistTrack] }
 
     /// Runs a JXA script off the main thread. Returns its output, or nil when Music is gone or macOS denied Automation.

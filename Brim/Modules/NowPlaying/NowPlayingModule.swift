@@ -40,7 +40,10 @@ final class NowPlayingModule: IslandModule {
         artwork = nil
     }
 
-    func send(_ command: MediaCommand) { MediaAdapter.run(["send", String(command.rawValue)]) }
+    func send(_ command: MediaCommand) {
+        if info?.bundleID == PlaylistModel.musicBundleID, command != .togglePlayPause { return PlaylistModel.skip(forward: command == .next) }
+        MediaAdapter.run(["send", String(command.rawValue)])
+    }
 
     func seek(to seconds: TimeInterval) { MediaAdapter.run(["seek", String(Int(seconds * 1_000_000))]) }
 
